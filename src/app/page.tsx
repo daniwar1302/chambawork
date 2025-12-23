@@ -474,7 +474,7 @@ export default function LandingPage() {
           </div>
         ) : (
           /* Chat Messages - Scrollable Area */
-          <div className="flex-1 overflow-y-auto py-6 space-y-6">
+          <div className="flex-1 overflow-y-auto py-6 space-y-6 scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
             {messages.map((msg) => (
               <div
                 key={msg.id}
@@ -532,7 +532,7 @@ export default function LandingPage() {
             )}
             
             <div ref={messagesEndRef} />
-          </div>
+        </div>
         )}
         
         {/* Footer tagline when not in chat */}
