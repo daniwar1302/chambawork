@@ -1,0 +1,271 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Enums
+enum UserRole {
+  ESTUDIANTE
+  TUTOR
+}
+
+enum Subject {
+  MATEMATICAS
+  ALGEBRA
+  CALCULO
+  FISICA
+  QUIMICA
+  BIOLOGIA
+  INGLES
+  ESPANOL
+  HISTORIA
+  GEOGRAFIA
+  PROGRAMACION
+  CIENCIAS_COMPUTACION
+  ECONOMIA
+  CONTABILIDAD
+  ESTADISTICA
+  OTRO
+}
+
+enum GradeLevel {
+  PRIMARIA
+  SECUNDARIA
+  PREPARATORIA
+  UNIVERSIDAD
+  POSGRADO
+  PROFESIONAL
+}
+
+enum SessionStatus {
+  PENDIENTE
+  CONFIRMADA
+  EN_PROGRESO
+  COMPLETADA
+  CANCELADA
+}
+
+enum OfferStatus {
+  ENVIADO
+  ACEPTADO
+  RECHAZADO
+}
+
+// NextAuth Models
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model PhoneVerification {
+  id        String   @id @default(cuid())
+  phone     String
+  code      String
+  expires   DateTime
+  verified  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([phone])
+}
+
+// Approved Tutors - Whitelist for tutor registration
+model ApprovedTutor {
+  id        String    @id @default(cuid())
+  phone     String    @unique
+  name      String?                // Tutor name for admin reference
+  notes     String?                // e.g., "Background check completed"
+  createdAt DateTime  @default(now())
+  usedAt    DateTime?              // When they actually signed up as tutor
+}
+
+// =============================================
+// APPLICATION MODELS
+// =============================================
+
+// User model - for both Students and Tutors
+model User {
+  id            String    @id @default(cuid())
+  
+  // Basic Info
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  phone         String?   @unique
+  phoneVerified DateTime?
+  
+  // Profile Photo
+  image         String?   // URL to profile photo (for auth providers like Google)
+  profilePhoto  String?   // URL to uploaded profile photo
+  
+  // Role & Status
+  role          UserRole  @default(ESTUDIANTE)
+  isActive      Boolean   @default(true)
+  
+  // Timezone (for scheduling)
+  timezone      String?   @default("America/Mexico_City")
+  
+  // Timestamps
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  accounts        Account[]
+  sessions        Session[]
+  tutorProfile    TutorProfile?
+  tutoringRequests TutoringRequest[]  // Requests made (as student)
+  sessionOffers   SessionOffer[]      // Sessions offered (as tutor)
+}
+
+// Tutor Profile - Additional info for tutors
+model TutorProfile {
+  id                  String        @id @default(cuid())
+  userId              String        @unique
+  
+  // Subjects & Expertise
+  subjects            Subject[]
+  gradeLevels         GradeLevel[]  // What grade levels they can tutor
+  specialties         String[]      // e.g., ["SAT Prep", "AP Calculus", "Essay Writing"]
+  
+  // Profile
+  bio                 String?       @db.Text
+  education           String?       // e.g., "MIT Computer Science"
+  experience          String?       // e.g., "5 years tutoring experience"
+  certifications      String[]      // e.g., ["Teaching Certificate", "TESOL"]
+  
+  // Languages
+  languages           String[]      @default(["Español"])
+  
+  // Availability
+  availability        Json?         // { monday: ["9:00-18:00"], tuesday: [...], ... }
+  
+  // Ratings & Stats
+  rating              Float?
+  totalReviews        Int           @default(0)
+  completedSessions   Int           @default(0)
+  
+  // Status
+  isActive            Boolean       @default(true)
+  isVerified          Boolean       @default(false)
+  
+  // Timestamps
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+
+  // Relations
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reviews Review[]
+}
+
+// Tutoring Request - Request from a student
+model TutoringRequest {
+  id           String        @id @default(cuid())
+  studentId    String
+  
+  // Session Details
+  subject      Subject
+  gradeLevel   GradeLevel?
+  topic        String?       // Specific topic, e.g., "Quadratic equations"
+  
+  // Scheduling
+  preferredDateTime DateTime?
+  duration     Int           @default(60)  // Duration in minutes
+  isFlexible   Boolean       @default(true) // Flexible on timing?
+  
+  // Details
+  description  String?       @db.Text  // What they need help with
+  goals        String?       // Learning goals
+  
+  // Status
+  status       SessionStatus @default(PENDIENTE)
+  
+  // Timestamps
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  // Relations
+  student User           @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  offers  SessionOffer[]
+}
+
+// Session Offer - Connection between request and tutor
+model SessionOffer {
+  id                 String        @id @default(cuid())
+  tutoringRequestId  String
+  tutorId            String
+  
+  // Offer Details
+  proposedDateTime   DateTime?     // When tutor can do it
+  message            String?       // Message from tutor
+  
+  // Status
+  status             OfferStatus   @default(ENVIADO)
+  sentAt             DateTime      @default(now())
+  respondedAt        DateTime?
+  
+  // Meeting Info (after accepted)
+  meetingLink        String?       // Zoom/Meet link
+  meetingNotes       String?       // Notes for the session
+  
+  // Relations
+  tutoringRequest TutoringRequest @relation(fields: [tutoringRequestId], references: [id], onDelete: Cascade)
+  tutor           User            @relation(fields: [tutorId], references: [id], onDelete: Cascade)
+
+  @@unique([tutoringRequestId, tutorId])
+}
+
+// Reviews - Student reviews for tutors
+model Review {
+  id              String   @id @default(cuid())
+  tutorProfileId  String
+  studentId       String
+  
+  // Rating
+  rating          Int      // 1-5 stars
+  comment         String?  @db.Text
+  
+  // What was good
+  tags            String[] // e.g., ["Patient", "Clear explanations", "Helpful"]
+  
+  // Timestamps
+  createdAt       DateTime @default(now())
+
+  // Relations
+  tutorProfile TutorProfile @relation(fields: [tutorProfileId], references: [id], onDelete: Cascade)
+}
