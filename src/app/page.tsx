@@ -307,6 +307,27 @@ export default function LandingPage() {
                 <p className="text-xs text-gray-400 text-center mt-4">
                   Te enviaremos un código por SMS para verificar
                 </p>
+                
+                {/* Guest Mode Button */}
+                <div className="mt-6 pt-6 border-t border-gray-200">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setHasStarted(true);
+                      addBotMessage(
+                        "¡Hola! 👋 Bienvenido a Chamba Tutorías.\n\nEstás explorando como invitado. Puedo ayudarte a:\n\n• Buscar tutores disponibles\n• Conocer las materias que ofrecemos\n• Responder tus preguntas\n\n¿En qué materia necesitas ayuda?",
+                        ["Matemáticas 📐", "Ciencias 🧪", "Inglés 🗣️", "Otra materia"]
+                      );
+                    }}
+                    className="w-full py-3 rounded-xl bg-gray-100 text-gray-700 font-medium hover:bg-gray-200 transition-all flex items-center justify-center gap-2"
+                  >
+                    Continuar como invitado
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                  <p className="text-xs text-gray-400 text-center mt-2">
+                    Explora sin registrarte
+                  </p>
+                </div>
               </div>
             ) : authStep === "otp" ? (
               /* OTP Verification Step */
@@ -351,15 +372,30 @@ export default function LandingPage() {
                     )}
                   </button>
                 </form>
-                <button
-                  onClick={() => {
-                    setAuthStep("phone");
-                    setOtpCode("");
-                  }}
-                  className="text-sm text-gray-400 hover:text-[#c41e3a] transition-colors mt-4 block mx-auto"
-                >
-                  ← Cambiar número
-                </button>
+                <div className="flex items-center justify-center gap-4 mt-4">
+                  <button
+                    onClick={() => {
+                      setAuthStep("phone");
+                      setOtpCode("");
+                    }}
+                    className="text-sm text-gray-400 hover:text-[#c41e3a] transition-colors"
+                  >
+                    ← Cambiar número
+                  </button>
+                  <span className="text-gray-300">|</span>
+                  <button
+                    onClick={() => {
+                      setHasStarted(true);
+                      addBotMessage(
+                        "¡Hola! 👋 Bienvenido a Chamba Tutorías.\n\nEstás explorando como invitado. Puedo ayudarte a:\n\n• Buscar tutores disponibles\n• Conocer las materias que ofrecemos\n• Responder tus preguntas\n\n¿En qué materia necesitas ayuda?",
+                        ["Matemáticas 📐", "Ciencias 🧪", "Inglés 🗣️", "Otra materia"]
+                      );
+                    }}
+                    className="text-sm text-gray-400 hover:text-[#c41e3a] transition-colors"
+                  >
+                    Continuar como invitado →
+                  </button>
+                </div>
               </div>
             ) : null}
             
@@ -461,7 +497,7 @@ export default function LandingPage() {
                   ) : (
                     <span className="text-gray-600 text-xs font-bold">Tú</span>
                   )}
-                </div>
+        </div>
                 
                 {/* Message */}
                 <div
