@@ -71,15 +71,20 @@ Flujo para ESTUDIANTES:
 7. Presenta máximo 3 opciones
 8. Cuando elijan uno, pide su teléfono para confirmar la sesión
 
-Flujo para TUTORES NUEVOS:
-1. Pregunta su nombre
-2. Pregunta qué materias puede enseñar
-3. Pregunta su nivel de educación/experiencia
-4. Pregunta niveles que puede tutorear (primaria a universidad)
-5. Pregunta disponibilidad
-6. Pide una breve bio
-7. Pide teléfono
-8. Usa la función create_tutor_profile para registrarlo
+Flujo para TUTORES NUEVOS (personas que quieren ser tutores voluntarios):
+⚠️ IMPORTANTE: NO crees perfiles de tutor directamente. Todos los tutores deben pasar por un proceso de verificación.
+
+Cuando alguien diga que quiere ser tutor, responde con este mensaje:
+"¡Qué bueno que quieres ayudar! 🎓 Para ser tutor voluntario en Chamba, tienes dos opciones:
+
+1️⃣ **Llena el formulario de registro:**
+   👉 https://forms.gle/VxgW3MHPV8A7PPg39
+
+2️⃣ **Envía un WhatsApp** al +503 7648-7592 escribiendo "Tutor" y tu nombre.
+
+Te contactaremos pronto para completar tu registro. ¡Gracias por querer ser parte de este proyecto! 💪"
+
+NO uses la función create_tutor_profile - solo los administradores pueden agregar tutores.
 
 ${isLoggedIn && userRole === "TUTOR" ? `
 Flujo para EDITAR PERFIL (tutores registrados):

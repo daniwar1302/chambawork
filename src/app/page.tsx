@@ -464,7 +464,13 @@ export default function LandingPage() {
             
             {/* Tutor CTA */}
             <button
-              onClick={() => handleQuickReply("Quiero ser tutor voluntario")}
+              onClick={() => {
+                setHasStarted(true);
+                addBotMessage(
+                  "¡Qué bueno que quieres ayudar! 🎓\n\nPara ser tutor voluntario en Chamba, tienes dos opciones:\n\n1️⃣ **Llena el formulario de registro:**\n👉 https://forms.gle/VxgW3MHPV8A7PPg39\n\n2️⃣ **Envía un WhatsApp** al +503 7648-7592 escribiendo \"Tutor\" y tu nombre.\n\nTe contactaremos pronto para completar tu registro. ¡Gracias por querer ser parte de este proyecto! 💪",
+                  ["Necesito tutoría", "¿Cómo funciona?"]
+                );
+              }}
               className="text-sm text-gray-400 hover:text-[#c41e3a] transition-colors flex items-center gap-2"
             >
               <GraduationCap className="w-4 h-4" />
