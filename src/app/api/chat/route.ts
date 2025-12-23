@@ -346,6 +346,8 @@ async function searchTutors(params: {
         rating: t.rating || 5.0,
         bio: t.bio,
         education: t.education,
+        experience: t.experience,
+        scheduling_link: t.schedulingLink,
         completed_sessions: t.completedSessions,
       })),
     };
@@ -872,13 +874,19 @@ async function handleWithRules(
       if (result.success && result.tutors && result.tutors.length > 0) {
         const tutorList = result.tutors
           .map(
-            (t, i) =>
-              `${i + 1}️⃣ **${t.name}**\n   📚 ${Array.isArray(t.subjects) ? t.subjects.join(", ") : t.subjects}\n   ⭐ ${t.rating} | ${t.completed_sessions} sesiones\n   ${t.bio || "Tutor voluntario"}`
+            (t, i) => {
+              const subjects = Array.isArray(t.subjects) ? t.subjects.join(", ") : t.subjects;
+              const education = t.education || t.experience || "No especificado";
+              const bio = t.bio || "Tutor voluntario";
+              const link = t.scheduling_link ? `\n📅 Agendar: ${t.scheduling_link}` : "";
+              
+              return `${i + 1}️⃣ ${t.name}\n\n📚 Materias: ${subjects}\n🎓 Educación: ${education}\n⭐ ${t.rating} | ${t.completed_sessions} sesiones\n\n${bio}${link}`;
+            }
           )
-          .join("\n\n");
+          .join("\n\n─────────────────\n\n");
 
         return {
-          message: `🔍 Encontré ${result.tutors.length} tutores disponibles:\n\n${tutorList}\n\n¿Con cuál te gustaría agendar una sesión? (1, 2 o 3)`,
+          message: `🔍 Encontré ${result.tutors.length} tutores disponibles:\n\n${tutorList}\n\n─────────────────\n\n¿Con cuál te gustaría agendar? Responde 1, 2 o 3`,
           quickReplies: ["1", "2", "3"],
           conversationState: {
             ...state,
