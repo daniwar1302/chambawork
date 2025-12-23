@@ -10,22 +10,49 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { LoadingSpinner } from "@/components/ui/loading";
 import { useToast } from "@/hooks/use-toast";
-import { PhoneInput } from "@/components/ui/phone-input";
 import { 
-  Sparkles, User, MapPin, DollarSign, FileText, Check, Power, 
-  Camera, X, Upload, Navigation, Plus, Image as ImageIcon 
+  GraduationCap, User, BookOpen, Calendar, FileText, Check, Power, 
+  Camera, X, Upload, Link as LinkIcon
 } from "lucide-react";
 
-export default function ProveedorPerfilPage() {
+// Subject options
+const SUBJECTS = [
+  { value: "MATEMATICAS", label: "Matemáticas", emoji: "➕" },
+  { value: "ALGEBRA", label: "Álgebra", emoji: "📐" },
+  { value: "CALCULO", label: "Cálculo", emoji: "∫" },
+  { value: "FISICA", label: "Física", emoji: "⚛️" },
+  { value: "QUIMICA", label: "Química", emoji: "🧪" },
+  { value: "BIOLOGIA", label: "Biología", emoji: "🧬" },
+  { value: "INGLES", label: "Inglés", emoji: "🗣️" },
+  { value: "ESPANOL", label: "Español", emoji: "📝" },
+  { value: "HISTORIA", label: "Historia", emoji: "📜" },
+  { value: "GEOGRAFIA", label: "Geografía", emoji: "🌍" },
+  { value: "PROGRAMACION", label: "Programación", emoji: "💻" },
+  { value: "CIENCIAS_COMPUTACION", label: "Ciencias de la Computación", emoji: "🖥️" },
+  { value: "ECONOMIA", label: "Economía", emoji: "📊" },
+  { value: "CONTABILIDAD", label: "Contabilidad", emoji: "🧮" },
+  { value: "ESTADISTICA", label: "Estadística", emoji: "📈" },
+  { value: "OTRO", label: "Otra materia", emoji: "📚" },
+];
+
+// Grade level options
+const GRADE_LEVELS = [
+  { value: "PRIMARIA", label: "Primaria", description: "1° a 6° grado" },
+  { value: "SECUNDARIA", label: "Secundaria", description: "7° a 9° grado" },
+  { value: "PREPARATORIA", label: "Preparatoria", description: "10° a 12° grado" },
+  { value: "UNIVERSIDAD", label: "Universidad", description: "Licenciatura" },
+  { value: "POSGRADO", label: "Posgrado", description: "Maestría / Doctorado" },
+  { value: "PROFESIONAL", label: "Profesional", description: "Educación continua" },
+];
+
+export default function TutorProfilePage() {
   const { update } = useSession();
   const router = useRouter();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const portfolioInputRef = useRef<HTMLInputElement>(null);
   
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [hasExistingProfile, setHasExistingProfile] = useState(false);
   
   // User profile
@@ -33,26 +60,14 @@ export default function ProveedorPerfilPage() {
   const [phone, setPhone] = useState("");
   const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
   
-  // Provider profile
-  const [city, setCity] = useState("");
-  const [serviceAreaRadiusKm, setServiceAreaRadiusKm] = useState(10);
-  const [servicesOffered, setServicesOffered] = useState<string[]>([]);
-  const [priceFrom, setPriceFrom] = useState(0);
-  const [priceTo, setPriceTo] = useState<number | null>(null);
+  // Tutor profile
+  const [subjects, setSubjects] = useState<string[]>([]);
+  const [gradeLevels, setGradeLevels] = useState<string[]>([]);
+  const [education, setEducation] = useState("");
+  const [experience, setExperience] = useState("");
+  const [schedulingLink, setSchedulingLink] = useState("");
   const [bio, setBio] = useState("");
   const [isActive, setIsActive] = useState(true);
-  const [specialties, setSpecialties] = useState<string[]>([]);
-  const [portfolioPhotos, setPortfolioPhotos] = useState<string[]>([]);
-  const [salonName, setSalonName] = useState("");
-  const [salonAddress, setSalonAddress] = useState("");
-  
-  // Location
-  const [lat, setLat] = useState<number | null>(null);
-  const [lng, setLng] = useState<number | null>(null);
-  const [locationError, setLocationError] = useState<string | null>(null);
-  
-  // New specialty input
-  const [newSpecialty, setNewSpecialty] = useState("");
 
   // Load existing profile
   useEffect(() => {
@@ -67,25 +82,19 @@ export default function ProveedorPerfilPage() {
           setProfilePhoto(userData.profilePhoto || userData.image || null);
         }
 
-        // Load provider profile
+        // Load tutor profile
         const profileRes = await fetch("/api/provider/profile");
         if (profileRes.ok) {
           const profileData = await profileRes.json();
           if (profileData) {
             setHasExistingProfile(true);
-            setCity(profileData.city || "");
-            setServiceAreaRadiusKm(profileData.serviceAreaRadiusKm || 10);
-            setServicesOffered(profileData.servicesOffered || []);
-            setPriceFrom(profileData.priceFrom || 0);
-            setPriceTo(profileData.priceTo || null);
+            setSubjects(profileData.subjects || []);
+            setGradeLevels(profileData.gradeLevels || []);
+            setEducation(profileData.education || "");
+            setExperience(profileData.experience || "");
+            setSchedulingLink(profileData.schedulingLink || "");
             setBio(profileData.bio || "");
             setIsActive(profileData.isActive ?? true);
-            setSpecialties(profileData.specialties || []);
-            setPortfolioPhotos(profileData.portfolioPhotos || []);
-            setSalonName(profileData.salonName || "");
-            setSalonAddress(profileData.salonAddress || "");
-            setLat(profileData.lat || null);
-            setLng(profileData.lng || null);
           }
         }
       } catch (error) {
@@ -98,63 +107,19 @@ export default function ProveedorPerfilPage() {
     loadProfile();
   }, []);
 
-  const handleServiceToggle = (service: string) => {
-    setServicesOffered((prev) =>
-      prev.includes(service)
-        ? prev.filter((s) => s !== service)
-        : [...prev, service]
+  const handleSubjectToggle = (subject: string) => {
+    setSubjects((prev) =>
+      prev.includes(subject)
+        ? prev.filter((s) => s !== subject)
+        : [...prev, subject]
     );
   };
 
-  const handleAddSpecialty = () => {
-    if (newSpecialty.trim() && !specialties.includes(newSpecialty.trim())) {
-      setSpecialties([...specialties, newSpecialty.trim()]);
-      setNewSpecialty("");
-    }
-  };
-
-  const handleRemoveSpecialty = (specialty: string) => {
-    setSpecialties(specialties.filter(s => s !== specialty));
-  };
-
-  const handleGetLocation = () => {
-    setIsGettingLocation(true);
-    setLocationError(null);
-    
-    if (!navigator.geolocation) {
-      setLocationError("Tu navegador no soporta geolocalización");
-      setIsGettingLocation(false);
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setLat(position.coords.latitude);
-        setLng(position.coords.longitude);
-        setIsGettingLocation(false);
-        toast({
-          title: "Ubicación obtenida",
-          description: "Tu ubicación ha sido guardada correctamente",
-        });
-      },
-      (error) => {
-        console.error("Geolocation error:", error);
-        let errorMessage = "No se pudo obtener tu ubicación";
-        if (error.code === 1) {
-          errorMessage = "Permiso de ubicación denegado. Por favor habilita el acceso a tu ubicación.";
-        } else if (error.code === 2) {
-          errorMessage = "No se pudo determinar tu ubicación. Intenta de nuevo.";
-        } else if (error.code === 3) {
-          errorMessage = "Tiempo de espera agotado. Intenta de nuevo.";
-        }
-        setLocationError(errorMessage);
-        setIsGettingLocation(false);
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 60000,
-      }
+  const handleGradeLevelToggle = (level: string) => {
+    setGradeLevels((prev) =>
+      prev.includes(level)
+        ? prev.filter((l) => l !== level)
+        : [...prev, level]
     );
   };
 
@@ -180,7 +145,6 @@ export default function ProveedorPerfilPage() {
       return;
     }
 
-    // Convert to base64 for now (in production, upload to cloud storage)
     const reader = new FileReader();
     reader.onload = (event) => {
       setProfilePhoto(event.target?.result as string);
@@ -188,42 +152,13 @@ export default function ProveedorPerfilPage() {
     reader.readAsDataURL(file);
   };
 
-  const handlePortfolioUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
-
-    const newPhotos: string[] = [];
-    
-    for (let i = 0; i < Math.min(files.length, 10 - portfolioPhotos.length); i++) {
-      const file = files[i];
-      
-      if (!file.type.startsWith("image/")) continue;
-      if (file.size > 5 * 1024 * 1024) continue;
-
-      await new Promise<void>((resolve) => {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          newPhotos.push(event.target?.result as string);
-          resolve();
-        };
-        reader.readAsDataURL(file);
-      });
-    }
-
-    setPortfolioPhotos([...portfolioPhotos, ...newPhotos]);
-  };
-
-  const removePortfolioPhoto = (index: number) => {
-    setPortfolioPhotos(portfolioPhotos.filter((_, i) => i !== index));
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!name || !phone || !city || servicesOffered.length === 0 || priceFrom <= 0) {
+    if (!name || !phone || subjects.length === 0 || gradeLevels.length === 0) {
       toast({
         title: "Campos incompletos",
-        description: "Por favor completa todos los campos requeridos",
+        description: "Por favor completa: nombre, teléfono, materias y niveles",
         variant: "destructive",
       });
       return;
@@ -243,24 +178,18 @@ export default function ProveedorPerfilPage() {
         throw new Error("Error al actualizar perfil de usuario");
       }
 
-      // Update provider profile
+      // Update tutor profile
       const profileRes = await fetch("/api/provider/profile", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          city,
-          serviceAreaRadiusKm,
-          servicesOffered,
-          priceFrom,
-          priceTo,
+          subjects,
+          gradeLevels,
+          education,
+          experience,
+          schedulingLink,
           bio,
           isActive,
-          specialties,
-          portfolioPhotos,
-          salonName,
-          salonAddress,
-          lat,
-          lng,
         }),
       });
 
@@ -275,7 +204,7 @@ export default function ProveedorPerfilPage() {
         title: "¡Perfil guardado!",
         description: hasExistingProfile 
           ? "Tu perfil ha sido actualizado" 
-          : "Ya puedes recibir solicitudes",
+          : "Ya puedes recibir solicitudes de estudiantes",
         variant: "success",
       });
 
@@ -302,40 +231,37 @@ export default function ProveedorPerfilPage() {
   }
 
   return (
-    <div className="space-y-6 pb-20">
+    <div className="space-y-6 pb-20 max-w-2xl mx-auto">
       <div className="text-center mb-8">
-        <div className="inline-flex items-center gap-2 px-4 py-2 bg-purple-100 rounded-full mb-4">
-          <Sparkles className="w-4 h-4 text-purple-600" />
-          <span className="text-sm text-purple-700 font-medium">
+        <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#c41e3a]/10 rounded-full mb-4">
+          <GraduationCap className="w-4 h-4 text-[#c41e3a]" />
+          <span className="text-sm text-[#c41e3a] font-medium">
             {hasExistingProfile ? "Editar perfil" : "Crear perfil de tutor"}
           </span>
         </div>
         <h1 className="text-2xl font-bold text-gray-800">
-          {hasExistingProfile ? "Tu perfil" : "¡Bienvenida a Chamba!"}
+          {hasExistingProfile ? "Tu perfil de tutor" : "¡Bienvenido a Chamba Tutorías!"}
         </h1>
         <p className="text-gray-600">
           {hasExistingProfile
             ? "Actualiza tu información para atraer más estudiantes"
-            : "Configura tu perfil para empezar a recibir solicitudes"}
+            : "Configura tu perfil para empezar a ayudar estudiantes"}
         </p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Profile Photo */}
+        {/* 1. Profile Photo */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
-              <Camera className="w-5 h-5 text-purple-500" />
+              <Camera className="w-5 h-5 text-[#c41e3a]" />
               Foto de perfil
             </CardTitle>
-            <CardDescription>
-              Una buena foto ayuda a generar confianza con los estudiantes
-            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-6">
               <div 
-                className="relative w-24 h-24 rounded-full bg-gray-100 border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden cursor-pointer hover:border-purple-400 transition-colors"
+                className="relative w-24 h-24 rounded-full bg-gray-100 border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden cursor-pointer hover:border-[#c41e3a] transition-colors"
                 onClick={() => fileInputRef.current?.click()}
               >
                 {profilePhoto ? (
@@ -373,9 +299,6 @@ export default function ProveedorPerfilPage() {
                     Eliminar
                   </Button>
                 )}
-                <p className="text-xs text-gray-500 mt-2">
-                  JPG, PNG o GIF. Máximo 5MB.
-                </p>
               </div>
               <input
                 ref={fileInputRef}
@@ -388,352 +311,205 @@ export default function ProveedorPerfilPage() {
           </CardContent>
         </Card>
 
-        {/* Personal Info */}
+        {/* 2. Personal Info - Name & Phone */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
-              <User className="w-5 h-5 text-purple-500" />
-              Información personal
+              <User className="w-5 h-5 text-[#c41e3a]" />
+              1. Información personal
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Nombre completo *</Label>
-                <Input
-                  id="name"
-                  placeholder="Tu nombre"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="phone">Teléfono (WhatsApp) *</Label>
-                <PhoneInput
-                  id="phone"
-                  value={phone}
-                  onChange={setPhone}
-                  placeholder="Número de teléfono"
-                />
-                <p className="text-xs text-gray-500">
-                  Los estudiantes te contactarán por este número
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Location */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <MapPin className="w-5 h-5 text-purple-500" />
-              Ubicación y área de servicio
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="city">Ciudad *</Label>
-                <Input
-                  id="city"
-                  placeholder="Ej: Ciudad de México"
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="radius">Radio de servicio (km)</Label>
-                <Input
-                  id="radius"
-                  type="number"
-                  min={1}
-                  max={100}
-                  value={serviceAreaRadiusKm}
-                  onChange={(e) => setServiceAreaRadiusKm(Number(e.target.value))}
-                />
-                <p className="text-xs text-gray-500">
-                  Distancia máxima que estás dispuesta a desplazarte
-                </p>
-              </div>
-            </div>
-
-            {/* GPS Location */}
             <div className="space-y-2">
-              <Label>Ubicación GPS (opcional)</Label>
-              <div className="flex items-center gap-4">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleGetLocation}
-                  disabled={isGettingLocation}
-                >
-                  {isGettingLocation ? (
-                    <>
-                      <LoadingSpinner size="sm" className="mr-2" />
-                      Obteniendo ubicación...
-                    </>
-                  ) : (
-                    <>
-                      <Navigation className="w-4 h-4 mr-2" />
-                      {lat && lng ? "Actualizar ubicación" : "Obtener mi ubicación"}
-                    </>
-                  )}
-                </Button>
-                {lat && lng && (
-                  <span className="text-sm text-green-600 flex items-center gap-1">
-                    <Check className="w-4 h-4" />
-                    Ubicación guardada
-                  </span>
-                )}
-              </div>
-              {locationError && (
-                <p className="text-sm text-red-500">{locationError}</p>
-              )}
+              <Label htmlFor="name">Nombre completo *</Label>
+              <Input
+                id="name"
+                placeholder="Tu nombre completo"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="phone">Teléfono de contacto (WhatsApp) *</Label>
+              <Input
+                id="phone"
+                type="tel"
+                placeholder="+502 1234 5678"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                required
+              />
               <p className="text-xs text-gray-500">
-                Tu ubicación (opcional, para referencia)
+                Los estudiantes te contactarán por este número
               </p>
             </div>
-
-            {/* Salon Info (optional) */}
-            <div className="border-t pt-4 mt-4">
-              <Label className="text-sm font-medium text-gray-700 mb-3 block">
-                Información adicional (opcional)
-              </Label>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="salonName" className="text-sm text-gray-600">Título o certificación</Label>
-                  <Input
-                    id="salonName"
-                    placeholder="Ej: Certificado en Matemáticas"
-                    value={salonName}
-                    onChange={(e) => setSalonName(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="salonAddress" className="text-sm text-gray-600">Institución o experiencia</Label>
-                  <Input
-                    id="salonAddress"
-                    placeholder="Calle, número, colonia..."
-                    value={salonAddress}
-                    onChange={(e) => setSalonAddress(e.target.value)}
-                  />
-                </div>
-              </div>
-            </div>
           </CardContent>
         </Card>
 
-        {/* Services */}
+        {/* 3. Subjects */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
-              💅 Servicios que ofreces
+              <BookOpen className="w-5 h-5 text-[#c41e3a]" />
+              2. Materias que puedes enseñar *
             </CardTitle>
             <CardDescription>
-              Selecciona los servicios que realizas
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <button
-                type="button"
-                onClick={() => handleServiceToggle("MANICURA")}
-                className={`p-4 rounded-xl border-2 transition-all text-left ${
-                  servicesOffered.includes("MANICURA")
-                    ? "border-pink-500 bg-pink-50"
-                    : "border-gray-200 hover:border-pink-300"
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <span className="text-2xl mb-2 block">💅</span>
-                    <span className="font-medium">Manicura</span>
-                  </div>
-                  {servicesOffered.includes("MANICURA") && (
-                    <Check className="w-5 h-5 text-pink-500" />
-                  )}
-                </div>
-              </button>
-              
-              <button
-                type="button"
-                onClick={() => handleServiceToggle("PEDICURA")}
-                className={`p-4 rounded-xl border-2 transition-all text-left ${
-                  servicesOffered.includes("PEDICURA")
-                    ? "border-purple-500 bg-purple-50"
-                    : "border-gray-200 hover:border-purple-300"
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <span className="text-2xl mb-2 block">🦶</span>
-                    <span className="font-medium">Pedicura</span>
-                  </div>
-                  {servicesOffered.includes("PEDICURA") && (
-                    <Check className="w-5 h-5 text-purple-500" />
-                  )}
-                </div>
-              </button>
-            </div>
-            {servicesOffered.length === 0 && (
-              <p className="text-sm text-red-500">
-                Selecciona al menos un servicio
-              </p>
-            )}
-
-            {/* Specialties */}
-            <div className="border-t pt-4 mt-4">
-              <Label className="text-sm font-medium text-gray-700 mb-3 block">
-                Especialidades (opcional)
-              </Label>
-              <div className="flex flex-wrap gap-2 mb-3">
-                {specialties.map((specialty) => (
-                  <span
-                    key={specialty}
-                    className="inline-flex items-center gap-1 px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm"
-                  >
-                    {specialty}
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveSpecialty(specialty)}
-                      className="hover:text-purple-900"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
-                  </span>
-                ))}
-              </div>
-              <div className="flex gap-2">
-                <Input
-                  placeholder="Ej: Gel ruso, Nail art, Acrílico..."
-                  value={newSpecialty}
-                  onChange={(e) => setNewSpecialty(e.target.value)}
-                  onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), handleAddSpecialty())}
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleAddSpecialty}
-                  disabled={!newSpecialty.trim()}
-                >
-                  <Plus className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Pricing */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <DollarSign className="w-5 h-5 text-purple-500" />
-              Precios
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="priceFrom">Precio desde (MXN) *</Label>
-                <Input
-                  id="priceFrom"
-                  type="number"
-                  min={0}
-                  placeholder="150"
-                  value={priceFrom || ""}
-                  onChange={(e) => setPriceFrom(Number(e.target.value))}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="priceTo">Precio hasta (MXN)</Label>
-                <Input
-                  id="priceTo"
-                  type="number"
-                  min={priceFrom || 0}
-                  placeholder="500"
-                  value={priceTo || ""}
-                  onChange={(e) => setPriceTo(e.target.value ? Number(e.target.value) : null)}
-                />
-              </div>
-            </div>
-            <p className="text-xs text-gray-500">
-              (Campo deshabilitado - servicio gratuito)
-            </p>
-          </CardContent>
-        </Card>
-
-        {/* Portfolio Photos */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <ImageIcon className="w-5 h-5 text-purple-500" />
-              Portafolio de trabajos
-            </CardTitle>
-            <CardDescription>
-              Muestra tus certificaciones o trabajos para atraer estudiantes (máx. 10 fotos)
+              Selecciona todas las materias en las que puedes dar tutoría
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
-              {portfolioPhotos.map((photo, index) => (
-                <div key={index} className="relative aspect-square rounded-lg overflow-hidden group">
-                  <img 
-                    src={photo} 
-                    alt={`Trabajo ${index + 1}`} 
-                    className="w-full h-full object-cover"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => removePortfolioPhoto(index)}
-                    className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    <X className="w-3 h-3" />
-                  </button>
-                </div>
-              ))}
-              {portfolioPhotos.length < 10 && (
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {SUBJECTS.map((subject) => (
                 <button
+                  key={subject.value}
                   type="button"
-                  onClick={() => portfolioInputRef.current?.click()}
-                  className="aspect-square rounded-lg border-2 border-dashed border-gray-300 hover:border-purple-400 transition-colors flex flex-col items-center justify-center text-gray-400 hover:text-purple-500"
+                  onClick={() => handleSubjectToggle(subject.value)}
+                  className={`p-3 rounded-xl border-2 transition-all text-left ${
+                    subjects.includes(subject.value)
+                      ? "border-[#c41e3a] bg-[#c41e3a]/5"
+                      : "border-gray-200 hover:border-[#c41e3a]/50"
+                  }`}
                 >
-                  <Plus className="w-6 h-6" />
-                  <span className="text-xs mt-1">Agregar</span>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span>{subject.emoji}</span>
+                      <span className="font-medium text-sm">{subject.label}</span>
+                    </div>
+                    {subjects.includes(subject.value) && (
+                      <Check className="w-4 h-4 text-[#c41e3a]" />
+                    )}
+                  </div>
                 </button>
-              )}
+              ))}
             </div>
-            <input
-              ref={portfolioInputRef}
-              type="file"
-              accept="image/*"
-              multiple
-              className="hidden"
-              onChange={handlePortfolioUpload}
-            />
-            <p className="text-xs text-gray-500 mt-3">
-              {portfolioPhotos.length}/10 fotos. JPG, PNG o GIF. Máximo 5MB cada una.
-            </p>
+            {subjects.length === 0 && (
+              <p className="text-sm text-red-500 mt-3">
+                Selecciona al menos una materia
+              </p>
+            )}
           </CardContent>
         </Card>
 
-        {/* Bio */}
+        {/* 4. Education & Experience */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
-              <FileText className="w-5 h-5 text-purple-500" />
-              Sobre ti
+              <GraduationCap className="w-5 h-5 text-[#c41e3a]" />
+              3. Nivel de educación y experiencia
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="education">Educación / Certificaciones</Label>
+              <Input
+                id="education"
+                placeholder="Ej: Licenciatura en Matemáticas, USAC"
+                value={education}
+                onChange={(e) => setEducation(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="experience">Experiencia</Label>
+              <Input
+                id="experience"
+                placeholder="Ej: 3 años dando clases particulares"
+                value={experience}
+                onChange={(e) => setExperience(e.target.value)}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* 5. Grade Levels */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg">
+              📚 4. Niveles que puedes tutorear *
             </CardTitle>
             <CardDescription>
-              Cuéntale a los estudiantes por qué elegirte
+              ¿A qué niveles educativos puedes dar tutoría?
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {GRADE_LEVELS.map((level) => (
+                <button
+                  key={level.value}
+                  type="button"
+                  onClick={() => handleGradeLevelToggle(level.value)}
+                  className={`p-3 rounded-xl border-2 transition-all text-left ${
+                    gradeLevels.includes(level.value)
+                      ? "border-[#c41e3a] bg-[#c41e3a]/5"
+                      : "border-gray-200 hover:border-[#c41e3a]/50"
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="font-medium text-sm block">{level.label}</span>
+                      <span className="text-xs text-gray-500">{level.description}</span>
+                    </div>
+                    {gradeLevels.includes(level.value) && (
+                      <Check className="w-4 h-4 text-[#c41e3a]" />
+                    )}
+                  </div>
+                </button>
+              ))}
+            </div>
+            {gradeLevels.length === 0 && (
+              <p className="text-sm text-red-500 mt-3">
+                Selecciona al menos un nivel
+              </p>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* 6. Scheduling Link */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <Calendar className="w-5 h-5 text-[#c41e3a]" />
+              5. Link para agendar sesiones
+            </CardTitle>
+            <CardDescription>
+              Comparte tu link de Google Meet, Calendly, o cualquier herramienta para agendar
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <Label htmlFor="schedulingLink">Link de agenda</Label>
+              <div className="relative">
+                <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Input
+                  id="schedulingLink"
+                  type="url"
+                  placeholder="https://calendly.com/tu-usuario o https://meet.google.com/xxx"
+                  value={schedulingLink}
+                  onChange={(e) => setSchedulingLink(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              <p className="text-xs text-gray-500">
+                Los estudiantes usarán este link para agendar sesiones contigo
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* 7. Bio */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <FileText className="w-5 h-5 text-[#c41e3a]" />
+              6. Breve biografía
+            </CardTitle>
+            <CardDescription>
+              Cuéntale a los estudiantes sobre ti y tu experiencia
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Textarea
-              placeholder="Ej: Especialista en Matemáticas con 5 años de experiencia. Ayudo a estudiantes de secundaria y preparatoria a entender conceptos complejos..."
+              placeholder="Ej: Soy ingeniero en sistemas con 5 años de experiencia en desarrollo de software. Me apasiona enseñar programación y matemáticas de una forma práctica y divertida..."
               value={bio}
               onChange={(e) => setBio(e.target.value)}
               rows={4}
@@ -745,13 +521,13 @@ export default function ProveedorPerfilPage() {
           </CardContent>
         </Card>
 
-        {/* Status */}
+        {/* Status (only for existing profiles) */}
         {hasExistingProfile && (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg">
-                <Power className="w-5 h-5 text-purple-500" />
-                Estado
+                <Power className="w-5 h-5 text-[#c41e3a]" />
+                Estado de disponibilidad
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -768,7 +544,7 @@ export default function ProveedorPerfilPage() {
                     </p>
                     <p className="text-sm text-gray-500">
                       {isActive
-                        ? "Recibirás nuevas solicitudes"
+                        ? "Recibirás nuevas solicitudes de estudiantes"
                         : "No recibirás nuevas solicitudes"}
                     </p>
                   </div>
@@ -786,7 +562,12 @@ export default function ProveedorPerfilPage() {
         )}
 
         {/* Submit */}
-        <Button type="submit" className="w-full" size="lg" disabled={isSaving}>
+        <Button 
+          type="submit" 
+          className="w-full bg-[#c41e3a] hover:bg-[#a01830]" 
+          size="lg" 
+          disabled={isSaving}
+        >
           {isSaving ? (
             <>
               <LoadingSpinner size="sm" className="mr-2" />
@@ -795,7 +576,7 @@ export default function ProveedorPerfilPage() {
           ) : hasExistingProfile ? (
             "Guardar cambios"
           ) : (
-            "Crear perfil y empezar"
+            "Crear perfil y empezar a ayudar"
           )}
         </Button>
       </form>

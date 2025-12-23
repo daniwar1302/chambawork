@@ -165,9 +165,12 @@ model TutorProfile {
   
   // Profile
   bio                 String?       @db.Text
-  education           String?       // e.g., "MIT Computer Science"
-  experience          String?       // e.g., "5 years tutoring experience"
-  certifications      String[]      // e.g., ["Teaching Certificate", "TESOL"]
+  education           String?       // e.g., "Licenciatura en Matemáticas, UNAM"
+  experience          String?       // e.g., "5 años de experiencia"
+  certifications      String[]      // e.g., ["Certificado en Enseñanza", "TESOL"]
+  
+  // Scheduling - Google Meet or Calendly link
+  schedulingLink      String?       // e.g., "https://calendly.com/tutor" or "https://meet.google.com/xxx"
   
   // Languages
   languages           String[]      @default(["Español"])
