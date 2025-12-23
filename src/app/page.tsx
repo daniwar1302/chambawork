@@ -553,7 +553,7 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="px-4 py-6 border-t border-gray-200 mt-auto bg-white">
         <div className="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-6 text-sm text-gray-400">
-          <p>© 2024 Chamba Tutorías</p>
+          <p>© 2025 Chamba Tutorías</p>
           <Link href="/admin" className="hover:text-[#c41e3a] transition-colors">
             Admin
           </Link>

@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
 
     if (!user || user.role !== "TUTOR") {
       return NextResponse.json(
-        { error: "Solo proveedoras pueden acceder" },
+        { error: "Solo tutores pueden acceder" },
         { status: 403 }
       );
     }

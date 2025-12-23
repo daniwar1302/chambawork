@@ -77,7 +77,7 @@ export default function NuevaSolicitudPage() {
         setIsGettingLocation(false);
         toast({
           title: "¡Ubicación obtenida!",
-          description: "Usaremos tu ubicación para encontrar proveedoras cercanas",
+          description: "Ubicación guardada correctamente",
           variant: "success",
         });
       },
@@ -261,7 +261,7 @@ export default function NuevaSolicitudPage() {
                 >
                   <span className="text-2xl mb-2 block">🏠</span>
                   <span className="font-medium text-sm">A domicilio</span>
-                  <p className="text-xs text-gray-500 mt-1">La proveedora va a ti</p>
+                  <p className="text-xs text-gray-500 mt-1">Sesión en línea</p>
                 </button>
                 
                 <button
@@ -273,8 +273,8 @@ export default function NuevaSolicitudPage() {
                   }`}
                 >
                   <span className="text-2xl mb-2 block">💇‍♀️</span>
-                  <span className="font-medium text-sm">En salón</span>
-                  <p className="text-xs text-gray-500 mt-1">Tú vas al salón</p>
+                  <span className="font-medium text-sm">En línea</span>
+                  <p className="text-xs text-gray-500 mt-1">Sesión virtual</p>
                 </button>
               </div>
             </div>
@@ -378,7 +378,7 @@ export default function NuevaSolicitudPage() {
               Preferencias (opcional)
             </CardTitle>
             <CardDescription>
-              Cuéntanos qué buscas para encontrar la proveedora ideal
+              Cuéntanos qué buscas para encontrar el tutor ideal
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -476,7 +476,7 @@ export default function NuevaSolicitudPage() {
                 </p>
                 <p>
                   <span className="font-medium">Modalidad:</span>{" "}
-                  {modality === "A_DOMICILIO" ? "🏠 A domicilio" : "💇‍♀️ En salón"}
+                  En línea
                 </p>
                 <p>
                   <span className="font-medium">Fecha:</span>{" "}
@@ -511,7 +511,7 @@ export default function NuevaSolicitudPage() {
                   </>
                 ) : (
                   <>
-                    Ver proveedoras
+                    Ver tutores
                     <ChevronRight className="w-4 h-4 ml-2" />
                   </>
                 )}

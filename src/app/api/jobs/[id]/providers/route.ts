@@ -99,7 +99,7 @@ export async function GET(
   } catch (error) {
     console.error("Error fetching providers:", error);
     return NextResponse.json(
-      { error: "Error al obtener proveedoras" },
+      { error: "Error al obtener tutores" },
       { status: 500 }
     );
   }

@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
 
     if (!provider || !provider.providerProfile?.isActive) {
       return NextResponse.json(
-        { error: "Proveedora no disponible" },
+        { error: "Tutor no disponible" },
         { status: 400 }
       );
     }
@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
 
     if (existingOffer) {
       return NextResponse.json(
-        { error: "Ya existe una oferta para esta proveedora" },
+        { error: "Ya existe una oferta para este tutor" },
         { status: 400 }
       );
     }
@@ -89,11 +89,11 @@ export async function POST(request: NextRequest) {
 
     // Send SMS notification to provider
     if (provider.phone) {
-      const serviceLabel = job.serviceType === "MANICURA" ? "Manicura" : "Pedicura";
+      const subjectLabel = job.subject || "Tutoría";
       const smsBody = generateProviderNewRequestSMS(
-        provider.name || "Proveedora",
-        serviceLabel,
-        job.locationText,
+        provider.name || "Tutor",
+        subjectLabel,
+        job.description || "Sin descripción",
         job.dateTime
       );
       

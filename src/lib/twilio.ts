@@ -179,8 +179,8 @@ export async function sendSMS(
  */
 export function generateProviderNewRequestSMS(
   providerName: string,
-  serviceType: string,
-  location: string,
+  subject: string,
+  description: string,
   dateTime: Date
 ): string {
   const formattedDate = new Intl.DateTimeFormat("es-MX", {
@@ -193,10 +193,11 @@ export function generateProviderNewRequestSMS(
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
-  return `🔔 ¡Nueva solicitud en Chamba!
+  return `🔔 ¡Nueva solicitud de tutoría en Chamba!
 
-${serviceType} en ${location}
+Materia: ${subject}
 📅 ${formattedDate}
+📝 ${description.substring(0, 50)}${description.length > 50 ? '...' : ''}
 
 Responde en: ${appUrl}/proveedor/dashboard`;
 }
@@ -218,12 +219,12 @@ export function generateClientConfirmationSMS(
     minute: "2-digit",
   }).format(dateTime);
 
-  return `✅ ¡${providerName} aceptó tu solicitud!
+  return `✅ ¡${providerName} aceptó tu solicitud de tutoría!
 
 ${serviceType}
 📅 ${formattedDate}
 
-Te contactará pronto para coordinar los detalles. 💅`;
+Te contactará pronto para coordinar los detalles. 📚`;
 }
 
 /**
@@ -235,7 +236,7 @@ export function generateClientRejectionSMS(
 ): string {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
-  return `😔 La proveedora no pudo aceptar tu solicitud de ${serviceType}.
+  return `😔 El tutor no pudo aceptar tu solicitud de ${serviceType}.
 
 Busca otra opción en: ${appUrl}`;
 }

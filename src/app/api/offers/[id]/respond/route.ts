@@ -98,13 +98,13 @@ export async function POST(
 
       // Send SMS notification to client
       if (offer.jobRequest.client.phone) {
-        const serviceLabel = offer.jobRequest.serviceType === "MANICURA" ? "Manicura" : "Pedicura";
-        const smsBody = generateClientConfirmationSMS(
-          offer.jobRequest.client.name || "Cliente",
-          provider?.name || "La proveedora",
-          serviceLabel,
-          offer.jobRequest.dateTime
-        );
+      const subjectLabel = offer.jobRequest.subject || "Tutoría";
+      const smsBody = generateClientConfirmationSMS(
+        offer.jobRequest.client.name || "Estudiante",
+        provider?.name || "El tutor",
+        subjectLabel,
+        offer.jobRequest.dateTime
+      );
         await sendSMS(offer.jobRequest.client.phone, smsBody);
       }
 
@@ -139,10 +139,10 @@ export async function POST(
 
         // Send SMS notification to client that all providers rejected
         if (offer.jobRequest.client.phone) {
-          const serviceLabel = offer.jobRequest.serviceType === "MANICURA" ? "Manicura" : "Pedicura";
+          const subjectLabel = offer.jobRequest.subject || "Tutoría";
           const smsBody = generateClientRejectionSMS(
-            offer.jobRequest.client.name || "Cliente",
-            serviceLabel
+            offer.jobRequest.client.name || "Estudiante",
+            subjectLabel
           );
           await sendSMS(offer.jobRequest.client.phone, smsBody);
         }

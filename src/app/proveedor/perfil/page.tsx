@@ -265,7 +265,7 @@ export default function ProveedorPerfilPage() {
       });
 
       if (!profileRes.ok) {
-        throw new Error("Error al guardar perfil de proveedora");
+        throw new Error("Error al guardar perfil de tutor");
       }
 
       // Update session
@@ -307,7 +307,7 @@ export default function ProveedorPerfilPage() {
         <div className="inline-flex items-center gap-2 px-4 py-2 bg-purple-100 rounded-full mb-4">
           <Sparkles className="w-4 h-4 text-purple-600" />
           <span className="text-sm text-purple-700 font-medium">
-            {hasExistingProfile ? "Editar perfil" : "Crear perfil de proveedora"}
+            {hasExistingProfile ? "Editar perfil" : "Crear perfil de tutor"}
           </span>
         </div>
         <h1 className="text-2xl font-bold text-gray-800">
@@ -315,7 +315,7 @@ export default function ProveedorPerfilPage() {
         </h1>
         <p className="text-gray-600">
           {hasExistingProfile
-            ? "Actualiza tu información para atraer más clientas"
+            ? "Actualiza tu información para atraer más estudiantes"
             : "Configura tu perfil para empezar a recibir solicitudes"}
         </p>
       </div>
@@ -329,7 +329,7 @@ export default function ProveedorPerfilPage() {
               Foto de perfil
             </CardTitle>
             <CardDescription>
-              Una buena foto ayuda a generar confianza con las clientas
+              Una buena foto ayuda a generar confianza con los estudiantes
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -417,7 +417,7 @@ export default function ProveedorPerfilPage() {
                   placeholder="Número de teléfono"
                 />
                 <p className="text-xs text-gray-500">
-                  Las clientas te contactarán por este número
+                  Los estudiantes te contactarán por este número
                 </p>
               </div>
             </div>
@@ -493,27 +493,27 @@ export default function ProveedorPerfilPage() {
                 <p className="text-sm text-red-500">{locationError}</p>
               )}
               <p className="text-xs text-gray-500">
-                Tu ubicación ayuda a las clientas a encontrar servicios cercanos
+                Tu ubicación (opcional, para referencia)
               </p>
             </div>
 
             {/* Salon Info (optional) */}
             <div className="border-t pt-4 mt-4">
               <Label className="text-sm font-medium text-gray-700 mb-3 block">
-                ¿Tienes salón? (opcional)
+                Información adicional (opcional)
               </Label>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="salonName" className="text-sm text-gray-600">Nombre del salón</Label>
+                  <Label htmlFor="salonName" className="text-sm text-gray-600">Título o certificación</Label>
                   <Input
                     id="salonName"
-                    placeholder="Mi Salón de Uñas"
+                    placeholder="Ej: Certificado en Matemáticas"
                     value={salonName}
                     onChange={(e) => setSalonName(e.target.value)}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="salonAddress" className="text-sm text-gray-600">Dirección del salón</Label>
+                  <Label htmlFor="salonAddress" className="text-sm text-gray-600">Institución o experiencia</Label>
                   <Input
                     id="salonAddress"
                     placeholder="Calle, número, colonia..."
@@ -661,7 +661,7 @@ export default function ProveedorPerfilPage() {
               </div>
             </div>
             <p className="text-xs text-gray-500">
-              Las clientas verán este rango de precios como referencia
+              (Campo deshabilitado - servicio gratuito)
             </p>
           </CardContent>
         </Card>
@@ -674,7 +674,7 @@ export default function ProveedorPerfilPage() {
               Portafolio de trabajos
             </CardTitle>
             <CardDescription>
-              Muestra tus mejores trabajos para atraer clientas (máx. 10 fotos)
+              Muestra tus certificaciones o trabajos para atraer estudiantes (máx. 10 fotos)
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -728,12 +728,12 @@ export default function ProveedorPerfilPage() {
               Sobre ti
             </CardTitle>
             <CardDescription>
-              Cuéntale a las clientas por qué elegirte
+              Cuéntale a los estudiantes por qué elegirte
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Textarea
-              placeholder="Ej: Especialista en uñas con 5 años de experiencia. Trabajo con productos de alta calidad y ofrezco atención personalizada..."
+              placeholder="Ej: Especialista en Matemáticas con 5 años de experiencia. Ayudo a estudiantes de secundaria y preparatoria a entender conceptos complejos..."
               value={bio}
               onChange={(e) => setBio(e.target.value)}
               rows={4}

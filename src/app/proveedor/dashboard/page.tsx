@@ -112,8 +112,8 @@ export default function ProveedorDashboardPage() {
       toast({
         title: action === "accept" ? "¡Cita confirmada!" : "Solicitud rechazada",
         description: action === "accept" 
-          ? "La clienta será notificada"
-          : "La clienta podrá elegir otra proveedora",
+          ? "El estudiante será notificado"
+          : "El estudiante podrá elegir otro tutor",
         variant: action === "accept" ? "success" : "default",
       });
 
@@ -179,7 +179,7 @@ export default function ProveedorDashboardPage() {
                 </AvatarFallback>
               </Avatar>
               <div>
-                <p className="font-medium">{job.client.name || "Clienta"}</p>
+                <p className="font-medium">{job.client.name || "Estudiante"}</p>
                 {offer.status === "ACEPTADO" && job.client.phone && (
                   <div className="flex items-center gap-1 text-sm text-gray-600">
                     <Phone className="w-3 h-3" />
@@ -266,7 +266,7 @@ export default function ProveedorDashboardPage() {
                   ¡Cita confirmada!
                 </p>
                 <p className="text-xs text-green-600">
-                  Contacta a la clienta para coordinar los detalles finales.
+                  Contacta al estudiante para coordinar los detalles finales.
                 </p>
               </div>
             )}

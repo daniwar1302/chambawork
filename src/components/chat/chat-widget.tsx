@@ -63,7 +63,7 @@ export function ChatWidget() {
       setTimeout(() => {
         addBotMessage(
           "¡Hola! 👋 Soy tu asistente de Chamba.\n\n¿En qué te puedo ayudar hoy?",
-          ["Busco una manicurista 💅", "Soy proveedora de servicios"]
+          ["Necesito tutoría 📚", "Soy tutor voluntario"]
         );
       }, 800);
     }

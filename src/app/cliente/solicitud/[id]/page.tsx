@@ -123,7 +123,7 @@ export default function SolicitudPage() {
       console.error("Error:", error);
       toast({
         title: "Error",
-        description: "No se pudieron cargar las proveedoras",
+        description: "No se pudieron cargar los tutores",
         variant: "destructive",
       });
     } finally {
@@ -169,12 +169,12 @@ export default function SolicitudPage() {
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || "Error al seleccionar proveedora");
+        throw new Error(error.error || "Error al seleccionar tutor");
       }
 
       toast({
         title: "¡Solicitud enviada!",
-        description: "La proveedora recibirá una notificación",
+        description: "El tutor recibirá una notificación",
         variant: "success",
       });
 
@@ -301,7 +301,7 @@ export default function SolicitudPage() {
               ¡Cita confirmada!
             </CardTitle>
             <CardDescription>
-              Tu proveedora ha aceptado la cita
+              Tu tutor ha aceptado la sesión
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -313,7 +313,7 @@ export default function SolicitudPage() {
               </Avatar>
               <div>
                 <h3 className="font-semibold text-lg">
-                  {acceptedOffer.provider.name || "Proveedora"}
+                  {acceptedOffer.provider.name || "Tutor"}
                 </h3>
                 {acceptedOffer.provider.providerProfile && (
                   <p className="text-sm text-gray-600">
@@ -336,7 +336,7 @@ export default function SolicitudPage() {
               <ul className="text-sm text-gray-600 space-y-2">
                 <li className="flex items-start gap-2">
                   <Check className="w-4 h-4 text-green-500 mt-0.5" />
-                  Espera a que la proveedora te contacte para confirmar detalles
+                  Espera a que el tutor te contacte para confirmar detalles
                 </li>
                 <li className="flex items-start gap-2">
                   <Check className="w-4 h-4 text-green-500 mt-0.5" />
@@ -344,7 +344,7 @@ export default function SolicitudPage() {
                 </li>
                 <li className="flex items-start gap-2">
                   <Check className="w-4 h-4 text-green-500 mt-0.5" />
-                  El pago se realiza directamente con la proveedora
+                  La sesión es completamente gratuita
                 </li>
               </ul>
             </div>
@@ -363,7 +363,7 @@ export default function SolicitudPage() {
               </div>
             </div>
             <h2 className="text-xl font-semibold text-gray-800 mb-2">
-              Esperando respuesta de la proveedora...
+              Esperando respuesta del tutor...
             </h2>
             <p className="text-gray-600 mb-4">
               Le enviamos una notificación. Te avisaremos cuando responda.
@@ -383,7 +383,7 @@ export default function SolicitudPage() {
               <CardContent className="p-4 flex items-center gap-3">
                 <AlertCircle className="w-5 h-5 text-amber-600 shrink-0" />
                 <p className="text-sm text-amber-800">
-                  La proveedora anterior no pudo aceptar tu cita. 
+                  El tutor anterior no pudo aceptar tu sesión. 
                   Elige otra opción de la lista.
                 </p>
               </CardContent>
@@ -392,7 +392,7 @@ export default function SolicitudPage() {
 
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-semibold text-gray-800">
-              Proveedoras recomendadas
+              Tutores recomendados
             </h2>
             <Button
               variant="ghost"
@@ -416,10 +416,10 @@ export default function SolicitudPage() {
               <CardContent className="p-8 text-center">
                 <Sparkles className="w-12 h-12 text-pink-300 mx-auto mb-4" />
                 <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                  No hay proveedoras disponibles
+                  No hay tutores disponibles
                 </h3>
                 <p className="text-gray-600 mb-4">
-                  Intenta con otra fecha u hora, o espera a que más proveedoras se unan.
+                  Intenta con otra fecha u hora, o espera a que más tutores se unan.
                 </p>
                 <Button variant="outline" onClick={() => router.push("/cliente/nueva-solicitud")}>
                   Modificar solicitud
@@ -442,7 +442,7 @@ export default function SolicitudPage() {
                         <div className="flex items-start justify-between gap-2">
                           <div>
                             <h3 className="font-semibold text-gray-800">
-                              {provider.name || "Proveedora"}
+                              {provider.name || "Tutor"}
                             </h3>
                             <div className="flex items-center gap-2 text-sm text-gray-500">
                               <MapPin className="w-3 h-3" />
