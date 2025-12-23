@@ -10,20 +10,26 @@ import { PhoneInput, usePhoneInput } from "@/components/ui/phone-input";
 
 // Helper function to convert URLs in text to clickable links
 function linkifyText(text: string): React.ReactNode {
-  // Regex to match URLs (with or without protocol)
-  const urlRegex = /(https?:\/\/[^\s]+|forms\.gle\/[^\s]+|[a-zA-Z0-9][-a-zA-Z0-9]*\.[a-zA-Z]{2,}(?:\/[^\s]*)?)/gi;
+  // First, strip any markdown link formatting [text](url) -> url
+  let cleanText = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '$2');
+  // Also remove any trailing ] or ) that might be left over
+  cleanText = cleanText.replace(/\]\(https?:\/\//g, ' https://');
   
-  const parts = text.split(urlRegex);
-  const matches = text.match(urlRegex) || [];
+  // Regex to match URLs (with or without protocol)
+  const urlRegex = /(https?:\/\/[^\s\]\)]+|forms\.gle\/[^\s\]\)]+)/gi;
+  
+  const parts = cleanText.split(urlRegex);
+  const matches = cleanText.match(urlRegex) || [];
   
   const result: React.ReactNode[] = [];
-  let matchIndex = 0;
   
   parts.forEach((part, index) => {
     if (part) {
       // Check if this part is a URL
       if (matches.includes(part)) {
-        const href = part.startsWith('http') ? part : `https://${part}`;
+        // Clean up any trailing punctuation
+        const cleanUrl = part.replace(/[\]\)]+$/, '');
+        const href = cleanUrl.startsWith('http') ? cleanUrl : `https://${cleanUrl}`;
         result.push(
           <a
             key={`link-${index}`}
@@ -32,10 +38,9 @@ function linkifyText(text: string): React.ReactNode {
             rel="noopener noreferrer"
             className="text-blue-600 hover:text-blue-800 underline break-all"
           >
-            {part}
+            {cleanUrl}
           </a>
         );
-        matchIndex++;
       } else {
         result.push(part);
       }
