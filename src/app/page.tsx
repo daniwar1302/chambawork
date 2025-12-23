@@ -8,6 +8,43 @@ import { Loader2, ArrowRight, BookOpen, Brain, Globe, Code, GraduationCap } from
 import { cn } from "@/lib/utils";
 import { PhoneInput, usePhoneInput } from "@/components/ui/phone-input";
 
+// Helper function to convert URLs in text to clickable links
+function linkifyText(text: string): React.ReactNode {
+  // Regex to match URLs (with or without protocol)
+  const urlRegex = /(https?:\/\/[^\s]+|forms\.gle\/[^\s]+|[a-zA-Z0-9][-a-zA-Z0-9]*\.[a-zA-Z]{2,}(?:\/[^\s]*)?)/gi;
+  
+  const parts = text.split(urlRegex);
+  const matches = text.match(urlRegex) || [];
+  
+  const result: React.ReactNode[] = [];
+  let matchIndex = 0;
+  
+  parts.forEach((part, index) => {
+    if (part) {
+      // Check if this part is a URL
+      if (matches.includes(part)) {
+        const href = part.startsWith('http') ? part : `https://${part}`;
+        result.push(
+          <a
+            key={`link-${index}`}
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 hover:text-blue-800 underline break-all"
+          >
+            {part}
+          </a>
+        );
+        matchIndex++;
+      } else {
+        result.push(part);
+      }
+    }
+  });
+  
+  return result;
+}
+
 interface Message {
   id: string;
   content: string;
@@ -467,7 +504,7 @@ export default function LandingPage() {
               onClick={() => {
                 setHasStarted(true);
                 addBotMessage(
-                  "¡Qué bueno que quieres ayudar! 🎓\n\nPara ser tutor voluntario en Chamba, tienes dos opciones:\n\n1️⃣ **Llena el formulario de registro:**\n👉 https://forms.gle/VxgW3MHPV8A7PPg39\n\n2️⃣ **Envía un WhatsApp** al +503 7648-7592 escribiendo \"Tutor\" y tu nombre.\n\nTe contactaremos pronto para completar tu registro. ¡Gracias por querer ser parte de este proyecto! 💪",
+                  "¡Qué bueno que quieres ayudar! 🎓\n\nPara ser tutor voluntario en Chamba, tienes dos opciones:\n\n1️⃣ Llena el formulario de registro:\n👉 forms.gle/VxgW3MHPV8A7PPg39\n\n2️⃣ Envía un WhatsApp al +503 7648-7592 escribiendo \"Tutor\" y tu nombre.\n\nTe contactaremos pronto para completar tu registro. ¡Gracias por querer ser parte de este proyecto! 💪",
                   ["Necesito tutoría", "¿Cómo funciona?"]
                 );
               }}
@@ -515,7 +552,7 @@ export default function LandingPage() {
                   )}
                 >
                   <p className="whitespace-pre-wrap text-sm leading-relaxed">
-                    {msg.content}
+                    {linkifyText(msg.content)}
                   </p>
                 </div>
               </div>

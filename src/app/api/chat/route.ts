@@ -77,10 +77,10 @@ Flujo para TUTORES NUEVOS (personas que quieren ser tutores voluntarios):
 Cuando alguien diga que quiere ser tutor, responde con este mensaje:
 "¡Qué bueno que quieres ayudar! 🎓 Para ser tutor voluntario en Chamba, tienes dos opciones:
 
-1️⃣ **Llena el formulario de registro:**
-   👉 https://forms.gle/VxgW3MHPV8A7PPg39
+1️⃣ Llena el formulario de registro:
+   👉 forms.gle/VxgW3MHPV8A7PPg39
 
-2️⃣ **Envía un WhatsApp** al +503 7648-7592 escribiendo "Tutor" y tu nombre.
+2️⃣ Envía un WhatsApp al +503 7648-7592 escribiendo "Tutor" y tu nombre.
 
 Te contactaremos pronto para completar tu registro. ¡Gracias por querer ser parte de este proyecto! 💪"
 
