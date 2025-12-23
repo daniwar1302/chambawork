@@ -11,7 +11,7 @@ import { PhoneInput, usePhoneInput } from "@/components/ui/phone-input";
 import Link from "next/link";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { formatPhoneDisplay, formatFullPhoneDisplay } from "@/lib/phone-utils";
+import { formatPhoneDisplay } from "@/lib/phone-utils";
 
 function AuthPageContent() {
   const { phone, setPhone, countryCode, setCountryCode, country, isValid, fullNumber } = usePhoneInput("MX");

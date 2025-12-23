@@ -82,7 +82,7 @@ export const authOptions: NextAuthOptions = {
         }
 
         // Find the user
-        let user = await prisma.user.findFirst({
+        const user = await prisma.user.findFirst({
           where: {
             OR: [
               { phone: formattedPhone },
