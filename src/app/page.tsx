@@ -216,9 +216,9 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* Header */}
-      <header className="px-6 py-5 border-b border-gray-200 bg-white">
+    <div className="h-screen bg-gray-50 flex flex-col overflow-hidden">
+      {/* Header - Fixed */}
+      <header className="flex-shrink-0 px-6 py-5 border-b border-gray-200 bg-white z-10">
         <nav className="max-w-6xl mx-auto flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3">
             <div className="w-10 h-10 bg-[#c41e3a] rounded-lg flex items-center justify-center">
@@ -247,8 +247,8 @@ export default function LandingPage() {
         </nav>
       </header>
 
-      {/* Main Chat Area */}
-      <main className="flex-1 flex flex-col max-w-4xl mx-auto w-full px-4">
+      {/* Main Chat Area - Scrollable */}
+      <main className="flex-1 flex flex-col max-w-4xl mx-auto w-full px-4 overflow-hidden">
         {/* Phone Auth Flow - Show first if not authenticated and not started */}
         {!session && !hasStarted && authStep !== "authenticated" ? (
           <div className="flex-1 flex flex-col items-center justify-center py-12">
@@ -473,7 +473,7 @@ export default function LandingPage() {
             </button>
           </div>
         ) : (
-          /* Chat Messages */
+          /* Chat Messages - Scrollable Area */
           <div className="flex-1 overflow-y-auto py-6 space-y-6">
             {messages.map((msg) => (
               <div
@@ -497,7 +497,7 @@ export default function LandingPage() {
                   ) : (
                     <span className="text-gray-600 text-xs font-bold">Tú</span>
                   )}
-        </div>
+                </div>
                 
                 {/* Message */}
                 <div
@@ -534,49 +534,6 @@ export default function LandingPage() {
             <div ref={messagesEndRef} />
           </div>
         )}
-
-        {/* Quick Replies */}
-        {hasStarted && quickReplies.length > 0 && !isTyping && (
-          <div className="flex flex-wrap gap-2 pb-4">
-            {quickReplies.map((reply, index) => (
-              <button
-                key={index}
-                onClick={() => handleQuickReply(reply)}
-                className="px-4 py-2 rounded-full border border-[#c41e3a]/30 text-[#c41e3a] text-sm hover:bg-[#c41e3a]/10 hover:border-[#c41e3a]/50 transition-all"
-              >
-                {reply}
-              </button>
-            ))}
-          </div>
-        )}
-
-        {/* Input Area - Only show when chat has started */}
-        {hasStarted && (
-          <div className="py-4 border-t border-gray-200">
-            <form onSubmit={handleSubmit} className="relative">
-              <input
-                ref={inputRef}
-                type="text"
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                placeholder="Escribe tu mensaje..."
-                disabled={isTyping}
-                className="w-full px-5 py-4 pr-14 rounded-xl bg-white border border-gray-200 focus:border-[#c41e3a]/50 outline-none transition-all text-gray-900 placeholder:text-gray-400 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
-              />
-              <button
-                type="submit"
-                disabled={!inputValue.trim() || isTyping}
-                className="absolute right-2 top-1/2 -translate-y-1/2 p-2.5 rounded-lg bg-[#c41e3a] text-white disabled:opacity-30 disabled:cursor-not-allowed hover:bg-[#a01830] transition-all"
-              >
-                {isTyping ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                ) : (
-                  <ArrowRight className="w-5 h-5" />
-                )}
-              </button>
-            </form>
-          </div>
-        )}
         
         {/* Footer tagline when not in chat */}
         {!hasStarted && (
@@ -586,9 +543,57 @@ export default function LandingPage() {
         )}
       </main>
 
-      {/* Footer */}
-      <footer className="px-4 py-6 border-t border-gray-200 mt-auto bg-white">
-        <div className="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-6 text-sm text-gray-400">
+      {/* Fixed Bottom Section - Quick Replies, Input, Footer */}
+      {hasStarted && (
+        <div className="flex-shrink-0 bg-gray-50 border-t border-gray-200">
+          <div className="max-w-4xl mx-auto w-full px-4">
+            {/* Quick Replies */}
+            {quickReplies.length > 0 && !isTyping && (
+              <div className="flex flex-wrap gap-2 py-3">
+                {quickReplies.map((reply, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handleQuickReply(reply)}
+                    className="px-4 py-2 rounded-full border border-[#c41e3a]/30 text-[#c41e3a] text-sm hover:bg-[#c41e3a]/10 hover:border-[#c41e3a]/50 transition-all bg-white"
+                  >
+                    {reply}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Input Area */}
+            <div className="py-3">
+              <form onSubmit={handleSubmit} className="relative">
+                <input
+                  ref={inputRef}
+                  type="text"
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  placeholder="Escribe tu mensaje..."
+                  disabled={isTyping}
+                  className="w-full px-5 py-4 pr-14 rounded-xl bg-white border border-gray-200 focus:border-[#c41e3a]/50 outline-none transition-all text-gray-900 placeholder:text-gray-400 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                />
+                <button
+                  type="submit"
+                  disabled={!inputValue.trim() || isTyping}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-2.5 rounded-lg bg-[#c41e3a] text-white disabled:opacity-30 disabled:cursor-not-allowed hover:bg-[#a01830] transition-all"
+                >
+                  {isTyping ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : (
+                    <ArrowRight className="w-5 h-5" />
+                  )}
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Footer - Fixed */}
+      <footer className="flex-shrink-0 px-4 py-4 border-t border-gray-200 bg-white">
+        <div className="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-4 text-sm text-gray-400">
           <p>© 2025 Chamba Tutorías</p>
           <Link href="/admin" className="hover:text-[#c41e3a] transition-colors">
             Admin
