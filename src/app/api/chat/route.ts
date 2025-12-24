@@ -876,17 +876,30 @@ async function handleWithRules(
           .map(
             (t, i) => {
               const subjects = Array.isArray(t.subjects) ? t.subjects.join(", ") : t.subjects;
-              const education = t.education || t.experience || "No especificado";
-              const bio = t.bio || "Tutor voluntario";
-              const link = t.scheduling_link ? `\n📅 Agendar: ${t.scheduling_link}` : "";
+              const gradeLevels = Array.isArray(t.grade_levels) ? t.grade_levels.map((l: string) => {
+                const labels: Record<string, string> = {
+                  PRIMARIA: "Primaria",
+                  SECUNDARIA: "Secundaria", 
+                  PREPARATORIA: "Preparatoria",
+                  UNIVERSIDAD: "Universidad",
+                  POSGRADO: "Posgrado",
+                  PROFESIONAL: "Profesional"
+                };
+                return labels[l] || l;
+              }).join(", ") : "";
+              const bio = t.bio || "Tutor voluntario dedicado a ayudar estudiantes.";
+              const firstName = t.name.split(" ")[0];
+              const bookButton = t.scheduling_link 
+                ? `\n\n👉 Agendar con ${firstName}: ${t.scheduling_link}`
+                : `\n\n👉 Responde "${i + 1}" para conectar con ${firstName}`;
               
-              return `${i + 1}️⃣ ${t.name}\n\n📚 Materias: ${subjects}\n🎓 Educación: ${education}\n⭐ ${t.rating} | ${t.completed_sessions} sesiones\n\n${bio}${link}`;
+              return `${i + 1}️⃣ **${t.name}**\n\n${bio}\n\n   • Materias: ${subjects}\n   • Nivel académico: ${gradeLevels}${bookButton}`;
             }
           )
           .join("\n\n─────────────────\n\n");
 
         return {
-          message: `🔍 Encontré ${result.tutors.length} tutores disponibles:\n\n${tutorList}\n\n─────────────────\n\n¿Con cuál te gustaría agendar? Responde 1, 2 o 3`,
+          message: `🔍 Encontré ${result.tutors.length} tutores disponibles:\n\n${tutorList}\n\n─────────────────\n\n¿Con cuál te gustaría agendar?`,
           quickReplies: ["1", "2", "3"],
           conversationState: {
             ...state,
