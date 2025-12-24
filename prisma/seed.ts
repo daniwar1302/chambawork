@@ -14,6 +14,26 @@ const profilePhotos = [
 
 const tutors = [
   {
+    name: "Daniela Guerra",
+    phone: "50376487592",
+    email: "daniela@chamba.com",
+    image: profilePhotos[1],
+    profile: {
+      subjects: [Subject.MATEMATICAS, Subject.PROGRAMACION, Subject.INGLES],
+      gradeLevels: [GradeLevel.PRIMARIA, GradeLevel.SECUNDARIA, GradeLevel.PREPARATORIA, GradeLevel.UNIVERSIDAD],
+      specialties: ["Matemáticas básicas", "Programación para principiantes", "Inglés conversacional"],
+      education: "Fundadora de Chamba Tutorías",
+      experience: "5+ años ayudando estudiantes",
+      schedulingLink: "https://calendar.app.google/nNaDZohU5rA2VysY7",
+      bio: "¡Hola! Soy Daniela, fundadora de Chamba Tutorías. Me encanta ayudar a estudiantes a alcanzar su potencial. Agenda una sesión conmigo para empezar tu camino de aprendizaje 🚀",
+      languages: ["Español", "Inglés"],
+      rating: 5.0,
+      totalReviews: 50,
+      completedSessions: 200,
+      isVerified: true,
+    },
+  },
+  {
     name: "Carlos Ramírez",
     phone: "5512345001",
     email: "carlos@example.com",
@@ -157,6 +177,8 @@ async function main() {
             gradeLevels: tutor.profile.gradeLevels,
             specialties: tutor.profile.specialties,
             education: tutor.profile.education,
+            experience: tutor.profile.experience,
+            schedulingLink: tutor.profile.schedulingLink,
             bio: tutor.profile.bio,
             languages: tutor.profile.languages,
             rating: tutor.profile.rating,
@@ -205,6 +227,15 @@ async function main() {
   // Add approved tutors to whitelist
   console.log("📋 Adding approved tutors to whitelist...\n");
   
+  await prisma.approvedTutor.create({
+    data: {
+      phone: "50376487592",
+      name: "Daniela Guerra",
+      notes: "Fundadora - Verificada",
+    },
+  });
+  console.log("  ✅ Daniela Guerra (Fundadora)\n");
+
   await prisma.approvedTutor.create({
     data: {
       phone: "5599999999",
