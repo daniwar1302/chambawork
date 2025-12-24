@@ -8,18 +8,77 @@ import { Loader2, ArrowRight, BookOpen, Brain, Globe, Code, GraduationCap } from
 import { cn } from "@/lib/utils";
 import { PhoneInput, usePhoneInput } from "@/components/ui/phone-input";
 
-// Helper function to format text with bold and clickable links
+// Helper function to format text with bold, clickable links, and book buttons
 function formatMessageText(text: string): React.ReactNode {
-  // First, strip any markdown link formatting [text](url) -> url
+  // First, handle book buttons {{BOOK_BUTTON:name:link}}
+  const bookButtonRegex = /\{\{BOOK_BUTTON:([^:]+):([^}]+)\}\}/g;
+  const segments: React.ReactNode[] = [];
+  let lastIndex = 0;
+  let match;
+  let keyIndex = 0;
+  
+  // Find all book buttons and process text around them
+  const textWithButtons = text;
+  const buttonMatches: { index: number; length: number; name: string; link: string }[] = [];
+  
+  while ((match = bookButtonRegex.exec(textWithButtons)) !== null) {
+    buttonMatches.push({
+      index: match.index,
+      length: match[0].length,
+      name: match[1],
+      link: match[2]
+    });
+  }
+  
+  if (buttonMatches.length === 0) {
+    // No book buttons, process as before
+    return processTextFormatting(text);
+  }
+  
+  // Process text segments and buttons
+  buttonMatches.forEach((btn, i) => {
+    // Add text before this button
+    if (btn.index > lastIndex) {
+      const textBefore = text.substring(lastIndex, btn.index);
+      segments.push(<span key={`text-${keyIndex++}`}>{processTextFormatting(textBefore)}</span>);
+    }
+    
+    // Add the button
+    segments.push(
+      <a
+        key={`book-btn-${i}`}
+        href={btn.link}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-block mt-2 px-6 py-2.5 bg-[#c41e3a] hover:bg-[#a01830] text-white font-medium rounded-full transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105"
+      >
+        📅 Book {btn.name}
+      </a>
+    );
+    
+    lastIndex = btn.index + btn.length;
+  });
+  
+  // Add remaining text after last button
+  if (lastIndex < text.length) {
+    segments.push(<span key={`text-end-${keyIndex}`}>{processTextFormatting(text.substring(lastIndex))}</span>);
+  }
+  
+  return segments;
+}
+
+// Helper to process bold and links (excluding book buttons)
+function processTextFormatting(text: string): React.ReactNode {
+  // Strip any markdown link formatting [text](url) -> url
   let cleanText = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '$2');
   cleanText = cleanText.replace(/\]\(https?:\/\//g, ' https://');
   
   // Split by bold markers and URLs
-  // This regex captures: **bold text**, URLs, or regular text
   const combinedRegex = /(\*\*[^*]+\*\*|https?:\/\/[^\s\]\)]+|forms\.gle\/[^\s\]\)]+)/gi;
   
   const parts = cleanText.split(combinedRegex);
-  const matches = cleanText.match(combinedRegex) || [];
+  const matchResult = cleanText.match(combinedRegex);
+  const matches: string[] = matchResult ? Array.from(matchResult) : [];
   
   const result: React.ReactNode[] = [];
   let keyIndex = 0;
@@ -27,9 +86,7 @@ function formatMessageText(text: string): React.ReactNode {
   parts.forEach((part) => {
     if (!part) return;
     
-    // Check if this part is in our matches (bold or URL)
     if (matches.includes(part)) {
-      // Check if it's bold text (**text**)
       if (part.startsWith('**') && part.endsWith('**')) {
         const boldText = part.slice(2, -2);
         result.push(
@@ -38,7 +95,6 @@ function formatMessageText(text: string): React.ReactNode {
           </strong>
         );
       }
-      // Check if it's a URL
       else if (part.match(/^(https?:\/\/|forms\.gle\/)/i)) {
         const cleanUrl = part.replace(/[\]\)]+$/, '');
         const href = cleanUrl.startsWith('http') ? cleanUrl : `https://${cleanUrl}`;

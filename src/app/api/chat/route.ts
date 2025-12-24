@@ -872,7 +872,7 @@ async function handleWithRules(
       if (result.success && result.tutors && result.tutors.length > 0) {
         const tutorList = result.tutors
           .map(
-            (t, i) => {
+            (t: { name: string; subjects: string | string[]; grade_levels: string[]; bio?: string; scheduling_link?: string }, i: number) => {
               const subjects = Array.isArray(t.subjects) ? t.subjects.join(", ") : t.subjects;
               const gradeLevels = Array.isArray(t.grade_levels) ? t.grade_levels.map((l: string) => {
                 const labels: Record<string, string> = {
@@ -888,7 +888,7 @@ async function handleWithRules(
               const bio = t.bio || "Tutor voluntario dedicado a ayudar estudiantes.";
               const firstName = t.name.split(" ")[0];
               const bookButton = t.scheduling_link 
-                ? `\n\n👉 Agendar con ${firstName}: ${t.scheduling_link}`
+                ? `\n\n{{BOOK_BUTTON:${firstName}:${t.scheduling_link}}}`
                 : `\n\n👉 Responde "${i + 1}" para conectar con ${firstName}`;
               
               return `${i + 1}️⃣ **${t.name}**\n\n${bio}\n\n   • Materias: ${subjects}\n   • Nivel académico: ${gradeLevels}${bookButton}`;
@@ -927,12 +927,14 @@ async function handleWithRules(
       if (selection >= 1 && selection <= 3) {
         // Get the selected tutor info
         let tutorName = "el tutor";
+        let tutorFirstName = "Tutor";
         let schedulingLink = "";
         try {
           const tutors = JSON.parse(state.data.tutors || "[]");
           const selectedTutor = tutors[selection - 1];
           if (selectedTutor) {
             tutorName = selectedTutor.name;
+            tutorFirstName = selectedTutor.name.split(" ")[0];
             schedulingLink = selectedTutor.scheduling_link || "";
           }
         } catch {
@@ -940,7 +942,7 @@ async function handleWithRules(
         }
 
         const bookingMessage = schedulingLink 
-          ? `\n\n📅 Agenda tu sesión directamente aquí:\n👉 ${schedulingLink}`
+          ? `\n\n{{BOOK_BUTTON:${tutorFirstName}:${schedulingLink}}}`
           : `\n\nEl tutor te contactará pronto para coordinar la sesión.`;
 
         return {
