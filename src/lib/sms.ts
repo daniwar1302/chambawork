@@ -1,11 +1,9 @@
 // Re-export from twilio.ts for backward compatibility
-// This file can be removed once all imports are updated to use @/lib/twilio
-
 export {
   sendSMS,
-  sendSMS as sendSms, // Legacy alias
+  sendSMS as sendSms,
   generateProviderNewRequestSMS,
-  generateProviderNewRequestSMS as generateProviderNotificationSMS, // Legacy alias
+  generateProviderNewRequestSMS as generateProviderNotificationSMS,
   generateClientConfirmationSMS,
   generateClientRejectionSMS,
 } from "./twilio";

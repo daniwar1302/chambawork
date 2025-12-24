@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { z } from "zod";
+import { Subject, GradeLevel } from "@prisma/client";
 
 // Validation schema for tutor profile
 const tutorProfileSchema = z.object({
@@ -69,8 +70,8 @@ export async function POST(request: NextRequest) {
         where: { userId: session.user.id },
         create: {
           userId: session.user.id,
-          subjects: subjects as any,
-          gradeLevels: gradeLevels as any,
+          subjects: subjects as Subject[],
+          gradeLevels: gradeLevels as GradeLevel[],
           education: education || null,
           experience: experience || null,
           schedulingLink: schedulingLink || null,
@@ -78,8 +79,8 @@ export async function POST(request: NextRequest) {
           isActive: isActive ?? true,
         },
         update: {
-          subjects: subjects as any,
-          gradeLevels: gradeLevels as any,
+          subjects: subjects as Subject[],
+          gradeLevels: gradeLevels as GradeLevel[],
           education: education || null,
           experience: experience || null,
           schedulingLink: schedulingLink || null,

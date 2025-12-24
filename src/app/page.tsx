@@ -2,11 +2,8 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { useSession, signIn } from "next-auth/react";
-import { Button } from "@/components/ui/button";
-import { Loader2, ArrowRight, BookOpen, Brain, Globe, Code, GraduationCap } from "lucide-react";
+import { Loader2, ArrowRight, GraduationCap } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { PhoneInput, usePhoneInput } from "@/components/ui/phone-input";
 
 // Helper function to format text with bold, clickable links, and book buttons
 function formatMessageText(text: string): React.ReactNode {
@@ -139,11 +136,7 @@ interface ConversationMessage {
   name?: string;
 }
 
-// Auth flow states
-type AuthStep = "phone" | "otp" | "authenticated";
-
 export default function LandingPage() {
-  const { data: session, update: updateSession } = useSession();
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [isTyping, setIsTyping] = useState(false);
@@ -153,25 +146,8 @@ export default function LandingPage() {
     data: {},
   });
   const [conversationHistory, setConversationHistory] = useState<ConversationMessage[]>([]);
-  const [hasStarted, setHasStarted] = useState(true); // Start chat immediately
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  
-  // Auth state
-  const [authStep, setAuthStep] = useState<AuthStep>(session ? "authenticated" : "phone");
-  const [pendingPhone, setPendingPhone] = useState<string>("");
-  const [isAuthLoading, setIsAuthLoading] = useState(false);
-  const [otpCode, setOtpCode] = useState("");
-  
-  // Phone input with country code selector
-  const { phone: phoneNumber, setPhone: setPhoneNumber, countryCode, setCountryCode, fullNumber, isValid: isPhoneValid } = usePhoneInput("GT");
-  
-  // Update auth step when session changes
-  useEffect(() => {
-    if (session) {
-      setAuthStep("authenticated");
-    }
-  }, [session]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -183,17 +159,17 @@ export default function LandingPage() {
 
   // Send initial welcome message when page loads
   useEffect(() => {
-    if (hasStarted && messages.length === 0) {
+    if (messages.length === 0) {
       const welcomeMessage: Message = {
         id: Math.random().toString(36).substring(7),
-        content: "¡Hola! 👋 Bienvenido a Chamba Tutorías.\n\nEstoy aquí para ayudarte a encontrar tutores voluntarios gratuitos.\n\n¿En qué materia necesitas ayuda?",
+        content: "¡Hola! 👋 Bienvenido a Chamba Tutorías.\n\nOfrecemos tutorías GRATUITAS con voluntarios.\n\n¿En qué te puedo ayudar?",
         isBot: true,
         timestamp: new Date(),
       };
       setMessages([welcomeMessage]);
-      setQuickReplies(["Matemáticas 📐", "Ciencias 🧪", "Inglés 🗣️", "Otra materia"]);
+      setQuickReplies(["Necesito ayuda con una materia 📚", "Quiero ser tutor voluntario 🎓"]);
     }
-  }, [hasStarted, messages.length]);
+  }, [messages.length]);
 
   const addBotMessage = useCallback((content: string, replies: string[] = []) => {
     const message: Message = {
@@ -207,82 +183,8 @@ export default function LandingPage() {
     setIsTyping(false);
   }, []);
 
-  // Handle phone submission for auth
-  const handlePhoneSubmit = async () => {
-    if (!isPhoneValid || !fullNumber) return;
-    
-    setIsAuthLoading(true);
-    
-    try {
-      const response = await fetch("/api/auth/send-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone: fullNumber }),
-      });
-      
-      const data = await response.json();
-      
-      if (data.success) {
-        setPendingPhone(fullNumber);
-        setAuthStep("otp");
-        setOtpCode(""); // Clear OTP input
-      } else {
-        alert(data.error || "Error al enviar código");
-      }
-    } catch (error) {
-      console.error("Error sending OTP:", error);
-      alert("Error al enviar código. Intenta de nuevo.");
-    } finally {
-      setIsAuthLoading(false);
-    }
-  };
-  
-  // Handle OTP verification
-  const handleOtpSubmit = async () => {
-    if (!otpCode.trim() || otpCode.length !== 6) return;
-    
-    setIsAuthLoading(true);
-    
-    try {
-      // First verify OTP via our API
-      const verifyResponse = await fetch("/api/auth/verify-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone: pendingPhone, code: otpCode }),
-      });
-      
-      const verifyData = await verifyResponse.json();
-      
-      if (verifyData.success) {
-        // Now sign in with NextAuth using the phone-otp provider
-        const signInResult = await signIn("phone-otp", {
-          phone: pendingPhone,
-          code: otpCode,
-          redirect: false,
-        });
-        
-        if (signInResult?.ok) {
-          setAuthStep("authenticated");
-          setInputValue(""); // Clear input for chat
-          await updateSession();
-        } else {
-          alert("Error al iniciar sesión");
-        }
-      } else {
-        alert(verifyData.error || "Código inválido");
-      }
-    } catch (error) {
-      console.error("Error verifying OTP:", error);
-      alert("Error al verificar código. Intenta de nuevo.");
-    } finally {
-      setIsAuthLoading(false);
-    }
-  };
-
   const sendMessage = async (content: string) => {
     if (!content.trim()) return;
-    
-    setHasStarted(true);
     
     // Add user message
     const userMessage: Message = {
@@ -359,17 +261,6 @@ export default function LandingPage() {
               </span>
             </div>
           </Link>
-          
-          {/* Only show account link when logged in */}
-          {session && (
-            <div className="flex items-center gap-3">
-              <Link href={session.user.role === "TUTOR" ? "/tutor/dashboard" : "/estudiante/solicitudes"}>
-                <Button variant="ghost" size="sm" className="text-gray-600 hover:text-gray-900 hover:bg-gray-100">
-                  Mi cuenta
-                </Button>
-              </Link>
-            </div>
-          )}
         </nav>
       </header>
 
