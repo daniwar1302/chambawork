@@ -69,11 +69,9 @@ IMPORTANTE: Este es un servicio GRATUITO de tutorías con voluntarios. NO hay co
 Flujo para ESTUDIANTES:
 1. Pregunta su nombre
 2. Pregunta en qué materia necesitan ayuda
-3. Pregunta tema específico o duda que tienen
-4. Pregunta su nivel académico (primaria, secundaria, preparatoria, universidad)
-5. Usa la función search_tutors para buscar tutores disponibles
-6. Presenta máximo 3 opciones
-7. Cuando elijan uno, pide su teléfono para confirmar la sesión
+3. Usa la función search_tutors para buscar tutores disponibles
+4. Presenta máximo 3 opciones con sus links de agendamiento
+5. Cuando elijan uno, muestra el link de agendamiento del tutor y despídete amablemente
 
 Flujo para TUTORES NUEVOS (personas que quieren ser tutores voluntarios):
 ⚠️ IMPORTANTE: NO crees perfiles de tutor directamente. Todos los tutores deben pasar por un proceso de verificación.
@@ -927,11 +925,29 @@ async function handleWithRules(
     case "student_select": {
       const selection = parseInt(msg);
       if (selection >= 1 && selection <= 3) {
+        // Get the selected tutor info
+        let tutorName = "el tutor";
+        let schedulingLink = "";
+        try {
+          const tutors = JSON.parse(state.data.tutors || "[]");
+          const selectedTutor = tutors[selection - 1];
+          if (selectedTutor) {
+            tutorName = selectedTutor.name;
+            schedulingLink = selectedTutor.scheduling_link || "";
+          }
+        } catch {
+          // Ignore parse errors
+        }
+
+        const bookingMessage = schedulingLink 
+          ? `\n\n📅 Agenda tu sesión directamente aquí:\n👉 ${schedulingLink}`
+          : `\n\nEl tutor te contactará pronto para coordinar la sesión.`;
+
         return {
-          message: `¡Excelente elección! 🎉\n\nPara confirmar tu sesión de tutoría, necesito tu número de teléfono:`,
+          message: `¡Excelente elección! 🎉\n\nHas seleccionado a ${tutorName}.${bookingMessage}\n\nRecuerda: ¡Las tutorías son GRATIS! 🎓\n\n¿Puedo ayudarte con algo más?`,
+          quickReplies: ["Agendar otra tutoría", "Eso es todo"],
           conversationState: {
-            ...state,
-            step: "student_phone",
+            step: "complete",
             data: { ...state.data, selection: selection.toString() },
           },
         };
@@ -939,24 +955,6 @@ async function handleWithRules(
       return {
         message: "Por favor elige una opción (1, 2 o 3)",
         quickReplies: ["1", "2", "3"],
-        conversationState: state,
-      };
-    }
-
-    case "student_phone": {
-      const phone = message.replace(/\D/g, "");
-      if (phone.length >= 10) {
-        return {
-          message: `✅ ¡Listo!\n\nHe enviado tu solicitud al tutor. Te contactará pronto al ${phone} para coordinar la sesión.\n\nRecuerda: ¡Las tutorías son GRATIS! 🎓\n\n¿Puedo ayudarte con algo más?`,
-          quickReplies: ["Agendar otra tutoría", "Eso es todo"],
-          conversationState: {
-            step: "complete",
-            data: { ...state.data, phone },
-          },
-        };
-      }
-      return {
-        message: "Por favor ingresa un número de teléfono válido (10 dígitos)",
         conversationState: state,
       };
     }
