@@ -8,31 +8,43 @@ import { Loader2, ArrowRight, BookOpen, Brain, Globe, Code, GraduationCap } from
 import { cn } from "@/lib/utils";
 import { PhoneInput, usePhoneInput } from "@/components/ui/phone-input";
 
-// Helper function to convert URLs in text to clickable links
-function linkifyText(text: string): React.ReactNode {
+// Helper function to format text with bold and clickable links
+function formatMessageText(text: string): React.ReactNode {
   // First, strip any markdown link formatting [text](url) -> url
   let cleanText = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '$2');
-  // Also remove any trailing ] or ) that might be left over
   cleanText = cleanText.replace(/\]\(https?:\/\//g, ' https://');
   
-  // Regex to match URLs (with or without protocol)
-  const urlRegex = /(https?:\/\/[^\s\]\)]+|forms\.gle\/[^\s\]\)]+)/gi;
+  // Split by bold markers and URLs
+  // This regex captures: **bold text**, URLs, or regular text
+  const combinedRegex = /(\*\*[^*]+\*\*|https?:\/\/[^\s\]\)]+|forms\.gle\/[^\s\]\)]+)/gi;
   
-  const parts = cleanText.split(urlRegex);
-  const matches = cleanText.match(urlRegex) || [];
+  const parts = cleanText.split(combinedRegex);
+  const matches = cleanText.match(combinedRegex) || [];
   
   const result: React.ReactNode[] = [];
+  let keyIndex = 0;
   
-  parts.forEach((part, index) => {
-    if (part) {
-      // Check if this part is a URL
-      if (matches.includes(part)) {
-        // Clean up any trailing punctuation
+  parts.forEach((part) => {
+    if (!part) return;
+    
+    // Check if this part is in our matches (bold or URL)
+    if (matches.includes(part)) {
+      // Check if it's bold text (**text**)
+      if (part.startsWith('**') && part.endsWith('**')) {
+        const boldText = part.slice(2, -2);
+        result.push(
+          <strong key={`bold-${keyIndex++}`} className="font-semibold">
+            {boldText}
+          </strong>
+        );
+      }
+      // Check if it's a URL
+      else if (part.match(/^(https?:\/\/|forms\.gle\/)/i)) {
         const cleanUrl = part.replace(/[\]\)]+$/, '');
         const href = cleanUrl.startsWith('http') ? cleanUrl : `https://${cleanUrl}`;
         result.push(
           <a
-            key={`link-${index}`}
+            key={`link-${keyIndex++}`}
             href={href}
             target="_blank"
             rel="noopener noreferrer"
@@ -44,6 +56,8 @@ function linkifyText(text: string): React.ReactNode {
       } else {
         result.push(part);
       }
+    } else {
+      result.push(part);
     }
   });
   
@@ -557,7 +571,7 @@ export default function LandingPage() {
                   )}
                 >
                   <p className="whitespace-pre-wrap text-sm leading-relaxed">
-                    {linkifyText(msg.content)}
+                    {formatMessageText(msg.content)}
                   </p>
                 </div>
               </div>
