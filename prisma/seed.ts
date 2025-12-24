@@ -170,7 +170,6 @@ async function main() {
         phoneVerified: new Date(),
         role: "TUTOR",
         image: tutor.image,
-        isActive: true,
         tutorProfile: {
           create: {
             subjects: tutor.profile.subjects,
@@ -207,7 +206,6 @@ async function main() {
       email: "estudiante@test.com",
       phoneVerified: new Date(),
       role: "ESTUDIANTE",
-      isActive: true,
     },
   });
   console.log(`  ✅ ${testStudent1.name} (${testStudent1.phone})\n`);
@@ -219,7 +217,6 @@ async function main() {
       email: "pedro@test.com",
       phoneVerified: new Date(),
       role: "ESTUDIANTE",
-      isActive: true,
     },
   });
   console.log(`  ✅ ${testStudent2.name} (${testStudent2.phone})\n`);

@@ -136,10 +136,6 @@ model User {
   
   // Role & Status
   role          UserRole  @default(ESTUDIANTE)
-  isActive      Boolean   @default(true)
-  
-  // Timezone (for scheduling)
-  timezone      String?   @default("America/Mexico_City")
   
   // Timestamps
   createdAt     DateTime  @default(now())
@@ -174,9 +170,6 @@ model TutorProfile {
   
   // Languages
   languages           String[]      @default(["Español"])
-  
-  // Availability
-  availability        Json?         // { monday: ["9:00-18:00"], tuesday: [...], ... }
   
   // Ratings & Stats
   rating              Float?
