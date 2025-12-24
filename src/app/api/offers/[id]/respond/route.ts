@@ -102,8 +102,7 @@ export async function POST(
       const smsBody = generateClientConfirmationSMS(
         offer.jobRequest.client.name || "Estudiante",
         provider?.name || "El tutor",
-        subjectLabel,
-        offer.jobRequest.dateTime
+        subjectLabel
       );
         await sendSMS(offer.jobRequest.client.phone, smsBody);
       }

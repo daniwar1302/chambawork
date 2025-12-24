@@ -3,7 +3,7 @@ import OpenAI from "openai";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import { sendOTP, verifyOTP } from "@/lib/twilio";
+// OTP functions available from @/lib/twilio if needed
 
 // Initialize OpenAI client (will be null if no API key)
 const openai = process.env.OPENAI_API_KEY

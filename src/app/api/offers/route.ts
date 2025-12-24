@@ -27,8 +27,16 @@ export async function POST(request: NextRequest) {
     const { jobRequestId, providerId } = validation.data;
 
     // Verify job belongs to client
-    const job = await prisma.jobRequest.findUnique({
+    const job = await prisma.tutoringRequest.findUnique({
       where: { id: jobRequestId },
+      include: {
+        student: {
+          select: {
+            name: true,
+            phone: true,
+          },
+        },
+      },
     });
 
     if (!job) {
@@ -38,17 +46,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (job.clientId !== session.user.id) {
+    if (job.studentId !== session.user.id) {
       return NextResponse.json({ error: "No autorizado" }, { status: 403 });
     }
 
     // Verify provider exists and is active
     const provider = await prisma.user.findUnique({
       where: { id: providerId },
-      include: { providerProfile: true },
+      include: { tutorProfile: true },
     });
 
-    if (!provider || !provider.providerProfile?.isActive) {
+    if (!provider || !provider.tutorProfile?.isActive) {
       return NextResponse.json(
         { error: "Tutor no disponible" },
         { status: 400 }
@@ -56,12 +64,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if offer already exists
-    const existingOffer = await prisma.jobOffer.findUnique({
+    const existingOffer = await prisma.sessionOffer.findFirst({
       where: {
-        jobRequestId_providerId: {
-          jobRequestId,
-          providerId,
-        },
+        tutoringRequestId: jobRequestId,
+        tutorId: providerId,
       },
     });
 
@@ -74,27 +80,26 @@ export async function POST(request: NextRequest) {
 
     // Create offer and update job status in transaction
     const [offer] = await prisma.$transaction([
-      prisma.jobOffer.create({
+      prisma.sessionOffer.create({
         data: {
-          jobRequestId,
-          providerId,
+          tutoringRequestId: jobRequestId,
+          tutorId: providerId,
           status: "ENVIADO",
         },
       }),
-      prisma.jobRequest.update({
+      prisma.tutoringRequest.update({
         where: { id: jobRequestId },
         data: { status: "PENDIENTE" },
       }),
     ]);
 
-    // Send SMS notification to provider
+    // Send SMS notification to provider (simulated - logs to console)
     if (provider.phone) {
       const subjectLabel = job.subject || "Tutoría";
       const smsBody = generateProviderNewRequestSMS(
         provider.name || "Tutor",
-        subjectLabel,
-        job.description || "Sin descripción",
-        job.dateTime
+        job.student?.name || "Estudiante",
+        subjectLabel
       );
       
       await sendSMS(provider.phone, smsBody);

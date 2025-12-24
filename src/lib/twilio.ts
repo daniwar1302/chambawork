@@ -1,26 +1,19 @@
-import Twilio from "twilio";
-
-// Twilio configuration
-const accountSid = process.env.TWILIO_ACCOUNT_SID;
-const authToken = process.env.TWILIO_AUTH_TOKEN;
-const verifyServiceSid = process.env.TWILIO_VERIFY_SERVICE_SID;
-const twilioPhoneNumber = process.env.TWILIO_PHONE_NUMBER;
-
-// Initialize Twilio client only if credentials exist
-const client = accountSid && authToken ? Twilio(accountSid, authToken) : null;
+// Simple OTP and SMS fallback (no Twilio dependency)
+// This file provides the same interface as before but without Twilio SDK
 
 // Test phone number for development/testing
 const TEST_PHONE = "+11111111111";
 const TEST_CODE = "000000";
+const DEV_CODE = "123456";
 
-// Check if Twilio is configured
+// Check if "Twilio" is configured (always false now, but kept for compatibility)
 export const isTwilioConfigured = (): boolean => {
-  return !!(client && verifyServiceSid);
+  return false;
 };
 
 /**
- * Send OTP via Twilio Verify
- * Falls back to console.log in development if Twilio not configured
+ * Send OTP - Simulated (no real SMS)
+ * Always succeeds and logs to console
  */
 export async function sendOTP(
   phone: string
@@ -38,37 +31,18 @@ export async function sendOTP(
     return { success: true };
   }
 
-  // Development fallback
-  if (!client || !verifyServiceSid) {
-    console.log("═══════════════════════════════════════════");
-    console.log("📱 OTP SIMULADO (Twilio no configurado)");
-    console.log(`Para: ${formattedPhone}`);
-    console.log("Código: 123456 (usar este en desarrollo)");
-    console.log("═══════════════════════════════════════════");
-    return { success: true };
-  }
-
-  try {
-    const verification = await client.verify.v2
-      .services(verifyServiceSid)
-      .verifications.create({
-        to: formattedPhone,
-        channel: "sms",
-      });
-
-    console.log(`📱 OTP enviado a ${formattedPhone}: ${verification.status}`);
-    return { success: verification.status === "pending" };
-  } catch (error) {
-    console.error("Twilio Verify error:", error);
-    const errorMessage =
-      error instanceof Error ? error.message : "Error al enviar código";
-    return { success: false, error: errorMessage };
-  }
+  // Development fallback - always succeeds
+  console.log("═══════════════════════════════════════════");
+  console.log("📱 OTP SIMULADO");
+  console.log(`Para: ${formattedPhone}`);
+  console.log(`Código de desarrollo: ${DEV_CODE}`);
+  console.log("═══════════════════════════════════════════");
+  return { success: true };
 }
 
 /**
- * Verify OTP via Twilio Verify
- * Falls back to accepting '123456' in development if Twilio not configured
+ * Verify OTP - Simulated (no real verification)
+ * Accepts test code or dev code
  */
 export async function verifyOTP(
   phone: string,
@@ -92,152 +66,62 @@ export async function verifyOTP(
     };
   }
 
-  // Development fallback - accept 123456
-  if (!client || !verifyServiceSid) {
-    const isValid = code === "123456";
-    console.log("═══════════════════════════════════════════");
-    console.log("📱 OTP VERIFICACIÓN (Twilio no configurado)");
-    console.log(`Para: ${formattedPhone}`);
-    console.log(`Código: ${code}`);
-    console.log(`Resultado: ${isValid ? "✅ Válido" : "❌ Inválido"}`);
-    console.log("═══════════════════════════════════════════");
-    return {
-      success: isValid,
-      error: isValid ? undefined : "Código inválido (usa 123456 en desarrollo)",
-    };
-  }
-
-  try {
-    const verificationCheck = await client.verify.v2
-      .services(verifyServiceSid)
-      .verificationChecks.create({
-        to: formattedPhone,
-        code,
-      });
-
-    const isApproved = verificationCheck.status === "approved";
-    console.log(
-      `📱 OTP verificación para ${formattedPhone}: ${verificationCheck.status}`
-    );
-
-    return {
-      success: isApproved,
-      error: isApproved ? undefined : "Código inválido o expirado",
-    };
-  } catch (error) {
-    console.error("Twilio verify check error:", error);
-    const errorMessage =
-      error instanceof Error ? error.message : "Error al verificar código";
-    return { success: false, error: errorMessage };
-  }
+  // Development fallback - accept dev code
+  const isValid = code === DEV_CODE;
+  console.log("═══════════════════════════════════════════");
+  console.log("📱 OTP VERIFICACIÓN SIMULADA");
+  console.log(`Para: ${formattedPhone}`);
+  console.log(`Código ingresado: ${code}`);
+  console.log(`Código esperado: ${DEV_CODE}`);
+  console.log(`Resultado: ${isValid ? "✅ Válido" : "❌ Inválido"}`);
+  console.log("═══════════════════════════════════════════");
+  
+  return {
+    success: isValid,
+    error: isValid ? undefined : `Código inválido (usa ${DEV_CODE} en desarrollo)`,
+  };
 }
 
 /**
- * Send a regular SMS message (for notifications)
- * Falls back to console.log if Twilio not configured
+ * Send SMS - Simulated (no real SMS)
+ * Always succeeds and logs to console
  */
 export async function sendSMS(
   to: string,
-  body: string
-): Promise<{ success: boolean; error?: string; simulated?: boolean }> {
-  // Ensure phone has + prefix
+  message: string
+): Promise<{ success: boolean; error?: string }> {
   const formattedPhone = to.startsWith("+") ? to : `+${to}`;
-
-  // Development fallback
-  if (!client || !twilioPhoneNumber) {
-    console.log("═══════════════════════════════════════════");
-    console.log("📱 SMS SIMULADO");
-    console.log(`Para: ${formattedPhone}`);
-    console.log(`Mensaje: ${body}`);
-    console.log("═══════════════════════════════════════════");
-    return { success: true, simulated: true };
-  }
-
-  try {
-    const message = await client.messages.create({
-      body,
-      from: twilioPhoneNumber,
-      to: formattedPhone,
-    });
-
-    console.log(`📱 SMS enviado a ${formattedPhone}: ${message.sid}`);
-    return { success: true };
-  } catch (error) {
-    console.error("Twilio SMS error:", error);
-    const errorMessage =
-      error instanceof Error ? error.message : "Error al enviar SMS";
-    return { success: false, error: errorMessage };
-  }
+  
+  console.log("═══════════════════════════════════════════");
+  console.log("📱 SMS SIMULADO");
+  console.log(`Para: ${formattedPhone}`);
+  console.log(`Mensaje: ${message}`);
+  console.log("═══════════════════════════════════════════");
+  
+  return { success: true };
 }
 
-// ============================================
-// SMS Notification Templates
-// ============================================
-
-/**
- * Generate notification SMS for provider when they receive a new job request
- */
+// SMS message generators (kept for compatibility)
 export function generateProviderNewRequestSMS(
   providerName: string,
-  subject: string,
-  description: string,
-  dateTime: Date
+  studentName: string,
+  subject: string
 ): string {
-  const formattedDate = new Intl.DateTimeFormat("es-MX", {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(dateTime);
-
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-
-  return `🔔 ¡Nueva solicitud de tutoría en Chamba!
-
-Materia: ${subject}
-📅 ${formattedDate}
-📝 ${description.substring(0, 50)}${description.length > 50 ? '...' : ''}
-
-Responde en: ${appUrl}/proveedor/dashboard`;
+  return `¡Hola ${providerName}! 👋\n\n${studentName} necesita ayuda con ${subject}.\n\nRevisa tu dashboard para más detalles: ${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/proveedor/dashboard\n\n¡Gracias por ser parte de Chamba Tutorías! 🎓`;
 }
 
-/**
- * Generate confirmation SMS for client when provider accepts
- */
 export function generateClientConfirmationSMS(
   clientName: string,
   providerName: string,
-  serviceType: string,
-  dateTime: Date
+  subject: string
 ): string {
-  const formattedDate = new Intl.DateTimeFormat("es-MX", {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(dateTime);
-
-  return `✅ ¡${providerName} aceptó tu solicitud de tutoría!
-
-${serviceType}
-📅 ${formattedDate}
-
-Te contactará pronto para coordinar los detalles. 📚`;
+  return `¡Hola ${clientName}! 🎉\n\n${providerName} ha aceptado tu solicitud de tutoría en ${subject}.\n\nRevisa los detalles en tu dashboard: ${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/cliente/solicitudes\n\n¡Que tengas una excelente sesión! 📚`;
 }
 
-/**
- * Generate rejection SMS for client when provider declines
- */
 export function generateClientRejectionSMS(
   clientName: string,
-  serviceType: string
+  providerName: string,
+  subject: string
 ): string {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-
-  return `😔 El tutor no pudo aceptar tu solicitud de ${serviceType}.
-
-Busca otra opción en: ${appUrl}`;
+  return `¡Hola ${clientName}!\n\nLamentamos informarte que ${providerName} no está disponible para tu solicitud de tutoría en ${subject} en este momento.\n\nNo te preocupes, puedes buscar otros tutores disponibles en: ${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}\n\n¡Gracias por usar Chamba Tutorías! 📚`;
 }
-
