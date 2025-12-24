@@ -193,6 +193,17 @@ export default function LandingPage() {
     setIsTyping(false);
   }, []);
 
+  // Auto-start chat when authenticated
+  useEffect(() => {
+    if (session && !hasStarted) {
+      setHasStarted(true);
+      addBotMessage(
+        `¡Hola${session.user?.name ? `, ${session.user.name}` : ""}! 👋\n\n¿En qué materia necesitas ayuda hoy?`,
+        ["Matemáticas 📐", "Ciencias 🧪", "Inglés 🗣️", "Otra materia"]
+      );
+    }
+  }, [session, hasStarted, addBotMessage]);
+
   // Handle phone submission for auth
   const handlePhoneSubmit = async () => {
     if (!isPhoneValid || !fullNumber) return;
@@ -364,8 +375,8 @@ export default function LandingPage() {
         {/* Phone Auth Flow - Show first if not authenticated and not started */}
         {!session && !hasStarted && authStep !== "authenticated" ? (
           <div className="flex-1 flex flex-col items-center justify-center py-12">
-            {/* Hero Section */}
-            <div className="text-center mb-12">
+            {/* Hero Section - Hidden */}
+            {/* <div className="text-center mb-12">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#c41e3a]/10 border border-[#c41e3a]/20 mb-6">
                 <span className="w-2 h-2 bg-[#c41e3a] rounded-full animate-pulse" />
                 <span className="text-[#c41e3a] text-sm font-medium">100% Gratuito</span>
@@ -377,7 +388,7 @@ export default function LandingPage() {
               <p className="text-gray-500 text-lg md:text-xl max-w-md mx-auto">
                 Conectamos estudiantes con tutores voluntarios para tutorías personalizadas en línea
               </p>
-            </div>
+            </div> */}
             
             {authStep === "phone" ? (
               /* Phone Input Step */
@@ -511,84 +522,18 @@ export default function LandingPage() {
               </div>
             ) : null}
             
-            {/* Subject icons strip */}
-            <div className="flex items-center gap-6 mt-16 text-gray-300">
+            {/* Subject icons strip - Hidden */}
+            {/* <div className="flex items-center gap-6 mt-16 text-gray-300">
               <BookOpen className="w-5 h-5" />
               <Brain className="w-5 h-5" />
               <Globe className="w-5 h-5" />
               <Code className="w-5 h-5" />
-            </div>
+            </div> */}
           </div>
         ) : !hasStarted ? (
-          /* Authenticated - Show subject options */
+          /* Authenticated - Chat will auto-start via useEffect */
           <div className="flex-1 flex flex-col items-center justify-center py-12">
-            <div className="text-center mb-10">
-              <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
-                ¡Hola{session?.user?.name ? `, ${session.user.name}` : ""}!
-              </h1>
-              <p className="text-gray-500 text-lg">
-                ¿En qué materia necesitas ayuda hoy?
-              </p>
-            </div>
-            
-            {/* Subject Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full max-w-3xl mb-10">
-              <button
-                onClick={() => handleQuickReply("Necesito ayuda con Matemáticas")}
-                className="group relative p-6 rounded-2xl bg-white border border-gray-200 hover:border-[#c41e3a]/50 hover:shadow-lg hover:shadow-[#c41e3a]/10 transition-all text-left overflow-hidden"
-              >
-                <div className="absolute top-0 right-0 w-20 h-20 bg-[#c41e3a]/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 group-hover:bg-[#c41e3a]/20 transition-all" />
-                <Brain className="w-8 h-8 text-[#c41e3a] mb-3" />
-                <p className="font-semibold text-gray-900 text-sm">Matemáticas</p>
-                <p className="text-gray-400 text-xs mt-1">Álgebra, Cálculo, Geometría</p>
-              </button>
-              
-              <button
-                onClick={() => handleQuickReply("Necesito ayuda con Ciencias")}
-                className="group relative p-6 rounded-2xl bg-white border border-gray-200 hover:border-[#c41e3a]/50 hover:shadow-lg hover:shadow-[#c41e3a]/10 transition-all text-left overflow-hidden"
-              >
-                <div className="absolute top-0 right-0 w-20 h-20 bg-[#c41e3a]/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 group-hover:bg-[#c41e3a]/20 transition-all" />
-                <BookOpen className="w-8 h-8 text-[#c41e3a] mb-3" />
-                <p className="font-semibold text-gray-900 text-sm">Ciencias</p>
-                <p className="text-gray-400 text-xs mt-1">Física, Química, Biología</p>
-              </button>
-              
-              <button
-                onClick={() => handleQuickReply("Necesito ayuda con Inglés")}
-                className="group relative p-6 rounded-2xl bg-white border border-gray-200 hover:border-[#c41e3a]/50 hover:shadow-lg hover:shadow-[#c41e3a]/10 transition-all text-left overflow-hidden"
-              >
-                <div className="absolute top-0 right-0 w-20 h-20 bg-[#c41e3a]/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 group-hover:bg-[#c41e3a]/20 transition-all" />
-                <Globe className="w-8 h-8 text-[#c41e3a] mb-3" />
-                <p className="font-semibold text-gray-900 text-sm">Inglés</p>
-                <p className="text-gray-400 text-xs mt-1">Gramática, Conversación</p>
-              </button>
-              
-              <button
-                onClick={() => handleQuickReply("Necesito ayuda con otra materia")}
-                className="group relative p-6 rounded-2xl bg-white border border-gray-200 hover:border-[#c41e3a]/50 hover:shadow-lg hover:shadow-[#c41e3a]/10 transition-all text-left overflow-hidden"
-              >
-                <div className="absolute top-0 right-0 w-20 h-20 bg-[#c41e3a]/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 group-hover:bg-[#c41e3a]/20 transition-all" />
-                <Code className="w-8 h-8 text-[#c41e3a] mb-3" />
-                <p className="font-semibold text-gray-900 text-sm">Otra</p>
-                <p className="text-gray-400 text-xs mt-1">Programación, Historia...</p>
-              </button>
-            </div>
-            
-            {/* Tutor CTA */}
-            <button
-              onClick={() => {
-                setHasStarted(true);
-                addBotMessage(
-                  "¡Qué bueno que quieres ayudar! 🎓\n\nPara ser tutor voluntario en Chamba, tienes dos opciones:\n\n1️⃣ Llena el formulario de registro:\n👉 forms.gle/VxgW3MHPV8A7PPg39\n\n2️⃣ Envía un WhatsApp al +503 7648-7592 escribiendo \"Tutor\" y tu nombre.\n\nTe contactaremos pronto para completar tu registro. ¡Gracias por querer ser parte de este proyecto! 💪",
-                  ["Necesito tutoría", "¿Cómo funciona?"]
-                );
-              }}
-              className="text-sm text-gray-400 hover:text-[#c41e3a] transition-colors flex items-center gap-2"
-            >
-              <GraduationCap className="w-4 h-4" />
-              ¿Quieres ayudar? Sé tutor voluntario
-              <ArrowRight className="w-4 h-4" />
-            </button>
+            <Loader2 className="w-8 h-8 text-[#c41e3a] animate-spin" />
           </div>
         ) : (
           /* Chat Messages - Scrollable Area */
